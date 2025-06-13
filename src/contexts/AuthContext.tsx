@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
-import { fetchProfileApi, loginApi, registerApi, requestOTP, resetPasswordApi, verifyOTP } from "../api/auth";
+import { fetchProfileApi, loginApi, registerApi, requestOTP, resetPasswordApi, verifyOTP, completeProfileApi } from "../api/auth";
 import * as SecureStore from "expo-secure-store";
 import { User } from "../types/user";
 import { Company } from "../types/company";
@@ -22,6 +22,7 @@ type AuthContextType = AuthState & {
     register: (data: { name: string; mobile: string; email: string; password: string }) => Promise<void>;
     forgotPassword: (mobile: string) => Promise<string>;
     verifyOtp: (mobile: string, otp: string) => Promise<void>;
+    completeProfile: (profileData: { name?: string; email?: string }) => Promise<void>;
     clearError: () => void;
 };
 
@@ -158,6 +159,23 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }
     }, []);
 
+    const completeProfile = useCallback(async (profileData: { name?: string; email?: string }) => {
+        setState(prev => ({ ...prev, isLoading: true, error: null }));
+        try {
+            if (!state.token) throw new Error("No token found");
+            const updatedUser = await completeProfileApi(state.token, profileData);
+            setState(prev => ({
+                ...prev,
+                user: updatedUser,
+                isLoading: false,
+                error: null
+            }));
+        } catch (error: any) {
+            setError(error?.message || "Failed to complete profile");
+            throw error;
+        }
+    }, [state.token]);
+
     const logout = async () => {
         setState(prev => ({ ...prev, token: null, user: null, company: null, isAuthenticated: false }));
         await SecureStore.deleteItemAsync("token");
@@ -174,6 +192,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             forgotPassword,
             resetPassword,
             verifyOtp,
+            completeProfile,
             clearError
         }}>
             {children}

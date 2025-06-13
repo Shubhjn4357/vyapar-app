@@ -8,14 +8,14 @@ export function useCompany() {
     const [companyList, setCompanyList] = useState<Company[]>();
     const [fetchError, setFetchError] = useState<any>(null);
     const [isLoading, setLoading] = useState<boolean>(true);
-    const { user,setCompany,company } = useAuth();
+    const { user, setCompany, company, token } = useAuth();
     const handleCompanySelect = async (company:Company) => {
         setCompany(company);
     };
     async function loadAllCompany() {
         try {
-            if (user) {
-                const companiesList = await getAllCompanyByUserId(user.id);
+            if (user && token) {
+                const companiesList = await getAllCompanyByUserId(user.id, token);
                 setFetchError(null);
                 setCompanyList(companiesList);
             }
@@ -32,7 +32,7 @@ export function useCompany() {
 
     useEffect(() => {
         loadAllCompany();
-    }, [user]);
+    }, [user, token]);
 
     return {
         loadAllCompany,

@@ -2,40 +2,77 @@ import { Company } from "../types/company";
 import { client } from "./client";
 import { ApiError } from "./errors";
 
-export const getAllCompanyByUserId = async (id:number): Promise<Company[]> => {
+interface ApiResponse<T> {
+    status: string;
+    data: T;
+    message?: string;
+}
+
+export const getMyCompanies = async (token: string): Promise<Company[]> => {
     try {
-        const {data} = await client.get<Company[]>(`/company/user/${id}`);
-        return data
+        const {data} = await client.get<ApiResponse<Company[]>>(`/company/my`, {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        });
+        return data.data;
     } catch (error) {
         console.log('datafetch:', error)
         throw new ApiError('Failed to get Companies', error);
     }
 };
-export const getCompanyById = async (id:string): Promise<Company> => {
+
+export const getAllCompanyByUserId = async (id:number, token: string): Promise<Company[]> => {
     try {
-        const {data} = await client.get<Company>(`/company/${id}`);
-        return data
+        const {data} = await client.get<ApiResponse<Company[]>>(`/company/user/${id}`, {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        });
+        return data.data;
+    } catch (error) {
+        console.log('datafetch:', error)
+        throw new ApiError('Failed to get Companies', error);
+    }
+};
+
+export const getCompanyById = async (id:string, token: string): Promise<Company> => {
+    try {
+        const {data} = await client.get<ApiResponse<Company>>(`/company/${id}`, {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        });
+        return data.data;
     } catch (error) {
         console.log('datafetch:', error)
         throw new ApiError('Failed to get Company', error);
     }
 };
 
-export const createCompany = async (userId:number,name:string,gstin:string,address:string|undefined): Promise<Company> => {
+export const createCompany = async (name:string, gstin:string, address:string|undefined, token: string): Promise<Company> => {
     try {
-        const {data}=await client.post(`/company/add`,{name,gstin,address,userId});
-        return data
+        const {data}=await client.post<ApiResponse<Company>>(`/company/add`,{name,gstin,address}, {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        });
+        return data.data;
     } catch (error) {
         console.log('datafetch:', error)
         throw new ApiError('Failed to create company', error);
     }
 };
 
-export const updateCompany = async (id:string,name:string,gstin:string,address:string|undefined): Promise<Company> => {
+export const updateCompany = async (id:string,name:string,gstin:string,address:string|undefined, token: string): Promise<Company> => {
     try {
-        const {data}=await client.put(`/company/${id}`,{name,gstin,address});
-        return data
+        const {data}=await client.put<ApiResponse<Company>>(`/company/${id}`,{name,gstin,address}, {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        });
+        return data.data;
     } catch (error) {
-        throw new ApiError('Failed to select company', error);
+        throw new ApiError('Failed to update company', error);
     }
 };
