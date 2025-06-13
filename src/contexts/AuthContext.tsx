@@ -76,7 +76,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                         isLoading: false
                     }));
                 } catch (error) {
-                    setError(error instanceof Error ? error.message : "Failed to fetch profile");
+                    setError(error instanceof Error ? error.message : "Failed to load profile");
                 }
                 finally{
                     setState(prev=>({...prev,isLoading:false}))

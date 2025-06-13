@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { Animated, View} from "react-native";
+import React from "react";
+import { Animated} from "react-native";
 import type { NativeStackScreenProps} from '@react-navigation/native-stack';
 import { CompanyStackParamList } from "@/src/types/navigation";
 import { Controller, useForm } from "react-hook-form";
@@ -10,6 +10,7 @@ import { Text, TextInput ,Button, useTheme} from "react-native-paper";
 import { createCompany } from "@/src/api/company";
 import { KeyboardAvoidingView } from "react-native";
 import { Platform } from "react-native";
+import { useAuth } from "@/src/contexts/AuthContext";
 type props = NativeStackScreenProps<CompanyStackParamList,'CreateCompany'>
 const CompanySchema = z.object({
     companyname: z.string().min(3, "Company Name Is Required"),
@@ -20,6 +21,7 @@ type companyForm=z.infer<typeof CompanySchema>
 export default function CreateCompanyScreen({ navigation }: props) {
     const styles = useStyle();
     const { colors } = useTheme();
+    const {user}= useAuth();
      const fadeAnim = React.useRef(new Animated.Value(0)).current;
    const { control, handleSubmit, formState: { errors } } = useForm<companyForm>({
            resolver: zodResolver(CompanySchema),
@@ -27,11 +29,26 @@ export default function CreateCompanyScreen({ navigation }: props) {
        });
 
     const onSubmit = async(data:companyForm) => {
-       const company = await createCompany(data.companyname,data.gstin,data.address)
-       alert(`New Company Added ${company.name}`)
-        navigation.goBack();
+        try {
+            if (!user) {
+                throw new Error("User not found");
+            }
+            const company = await createCompany(user?.id,data.companyname, data.gstin, data.address);
+            alert(`New Company Added ${company.name}`);
+            navigation.goBack();
+        } catch (error) {
+            alert("Failed to create company. Please try again.");
+            console.error(error);
+        }
     };
-
+    React.useEffect(() => {
+            Animated.timing(fadeAnim, {
+                toValue: 1,
+                duration: 600,
+                useNativeDriver: true,
+            }).start();
+            // return clearError;
+        }, []);
     return (
        <KeyboardAvoidingView
                   style={{ flex: 1, backgroundColor: colors.background }}
@@ -50,7 +67,7 @@ export default function CreateCompanyScreen({ navigation }: props) {
                         error={!!errors.companyname}
                         style={styles.input}
                         mode="outlined"
-                        keyboardType="phone-pad"
+                      
                     />
                 )}
             />
@@ -66,7 +83,7 @@ export default function CreateCompanyScreen({ navigation }: props) {
                         error={!!errors.gstin}
                         style={styles.input}
                         mode="outlined"
-                        keyboardType="phone-pad"
+                       
                     />
                 )}
             />
@@ -82,7 +99,7 @@ export default function CreateCompanyScreen({ navigation }: props) {
                         error={!!errors.address}
                         style={styles.input}
                         mode="outlined"
-                        keyboardType="phone-pad"
+                        
                     />
                 )}
             />

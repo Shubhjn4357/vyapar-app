@@ -37,13 +37,17 @@ export default function RegisterScreen({ navigation }: props) {
     }, []);
 
     const onSubmit = async (data: RegisterForm) => {
-        await register(data);
-        const response = await requestOTP(data.mobile);
-        if (!response) {
-            alert("Failed to send OTP. Please try again.");
-            return;
+        try {
+            await register(data);
+            const response = await requestOTP(data.mobile);
+            if (!response) {
+                throw new Error("Failed to send OTP. Please try again.");
+            }
+            navigation.navigate("OTPVerification", { mobile: data.mobile, otpId: response.otpId });
+        } catch (error) {
+            console.log(error);
+            alert("Registration failed. Please try again.");
         }
-        navigation.navigate("OTPVerification", { mobile: data.mobile, otpId: response.otpId });
     };
 
     return (

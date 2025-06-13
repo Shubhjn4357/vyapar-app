@@ -1,57 +1,33 @@
 import React from "react";
-import { SafeAreaView, StatusBar } from "react-native";
 import { PaperProvider } from "react-native-paper";
 import { ThemeProvider, useTheme } from "../contexts/ThemeContext";
 import { NetworkProvider } from '../contexts/NetworkContext';
-import { LoadingProvider,useLoading } from '../contexts/LoadingContext';
+import { LoadingProvider } from '../contexts/LoadingContext';
 import RootNavigator from "../navigation/RootNavigator";
 import { ErrorBoundary } from '../components/ErrorBoundary';
 import { NetworkBanner } from '../components/NetworkBanner';
-import { storage, StorageKeys } from '../utils/storage';
-import { SplashScreen } from '../components/SplashScreen';
 import { AuthProvider } from "../contexts/AuthContext";
+import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
+import { StatusBar } from 'expo-status-bar';
 
 const AppContent = () => {
-    const { theme ,mode} = useTheme();
-    const { isLoading, setLoading } = useLoading();
-    React.useEffect(() => {
-        const initializeApp = async () => {
-            try {
-                const [themeData, authData] = await Promise.all([
-                    storage.get(StorageKeys.THEME),
-                    storage.get(StorageKeys.AUTH),
-                ]);
-                // Add minimum splash screen display time
-                await new Promise(resolve => setTimeout(resolve, 2000));
-                setLoading(false);
-            } catch (error) {
-                console.error('App initialization error:', error);
-                setLoading(false);
-            }
-        };
-
-        initializeApp();
-    }, []);
-
-    if (isLoading) {
-        return <SplashScreen />;
-    }
-
+    const { theme, mode } = useTheme();
     return (
-        <SafeAreaView style={{ flex: 1 }}>
-            <StatusBar barStyle={mode === "dark" ? 'dark-content' : 'light-content'} />
+        <>
+            <StatusBar style={mode === "dark" ? 'light' : 'dark'} />
             <NetworkBanner />
-            <PaperProvider theme={{ colors: { ...theme }, animation: { scale: 1.0 ,defaultAnimationDuration:0.5} }}>
+            <PaperProvider theme={{ colors: { ...theme }, animation: { scale: 1.0, defaultAnimationDuration: 0.5 } }}>
                 <AuthProvider>
-                        <RootNavigator />
+                    <RootNavigator />
                 </AuthProvider>
             </PaperProvider>
-        </SafeAreaView>
+       </>
     );
 };
 
 export default function App() {
     return (
+        <SafeAreaProvider>
         <ErrorBoundary>
             <LoadingProvider>
                 <NetworkProvider>
@@ -61,5 +37,6 @@ export default function App() {
                 </NetworkProvider>
             </LoadingProvider>
         </ErrorBoundary>
+        </SafeAreaProvider>
     );
 }

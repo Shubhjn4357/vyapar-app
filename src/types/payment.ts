@@ -1,5 +1,3 @@
-import type { SelectPayments } from "e:/myApp/vyapar-server/src/db/schema";
-
 export interface Payment {
     id: string;
     billId: string;

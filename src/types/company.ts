@@ -1,10 +1,12 @@
-export interface Company {
+export type Company = {
     id: string;
+    userId: number;
     name: string;
     gstin: string;
-    address?: string;
-    createdBy?: string;
-    updatedBy?: string;
-    createdAt?: string;
-    updatedAt?: string;
-}
+    address: string;
+    createdBy: number;
+    updatedBy: number;
+    createdAt: Date;
+    updatedAt: Date;
+};
+

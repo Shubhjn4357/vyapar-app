@@ -11,25 +11,23 @@ export enum SubscriptionStatus {
     CANCELLED = 'cancelled',
 }
 
-export interface User {
+export type User = {
     id: number;
-    name?: string;
-    email?: string;
+    name: string;
+    email: string;
     mobile: string;
-    password?: string;
+    password: string;
     role: UserRole;
-    googleId?: string;
-    facebookId?: string;
-    appleId?: string;
-    isProfileComplete?: boolean;
-    subscription?: {
+    googleId: string;
+    facebookId: string;
+    appleId: string;
+    isProfileComplete: boolean;
+    subscription: {
         planId: string;
         status: SubscriptionStatus;
         expiresAt: string;
     };
-    companies: string[]; // Array of company IDs
-    selectedCompanyId?: string;
-    createdAt?: string;
-    updatedAt?: string;
-}
+    createdAt: Date;
+    updatedAt: Date;
+};
 

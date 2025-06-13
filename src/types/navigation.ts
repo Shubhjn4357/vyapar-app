@@ -1,9 +1,12 @@
 import { NavigatorScreenParams } from '@react-navigation/native';
 
 export type RootStackParamList = {
+  Splash: undefined;
   Auth: NavigatorScreenParams<AuthStackParamList>;
   Main: NavigatorScreenParams<MainTabParamList>;
-  CompanySetup: NavigatorScreenParams<CompanyStackParamList>;
+  CompanyList: undefined;
+  CreateCompany: undefined;
+  EditCompany: { companyId: string };
   CompleteProfile?: { userId: number };
 };
 
@@ -16,16 +19,12 @@ export type AuthStackParamList = {
   ResetPassword: { token: string; mobile: string }; // <-- add mobile here
   SocialAuth: { provider: 'google' | 'facebook'; token: string };
   Main: NavigatorScreenParams<MainTabParamList>;
-  CompanySetup: NavigatorScreenParams<CompanyStackParamList>;
 };
 
-export type CompanyStackParamList = {
-  CompanyList: undefined;
-  CreateCompany: undefined;
-  EditCompany: { companyId: number };
-};
+
 
 export type MainTabParamList = {
+  
   Dashboard: undefined;
   Bills: NavigatorScreenParams<BillStackParamList>;
   Accounting: NavigatorScreenParams<AccountingStackParamList>;

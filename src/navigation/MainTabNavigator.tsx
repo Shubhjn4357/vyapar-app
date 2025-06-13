@@ -7,18 +7,23 @@ import AccountingNavigator from "./AccountingNavigator";
 import GSTNavigator from "./GSTNavigator";
 import ReportNavigator from "./ReportNavigator";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
+import CompanySelector from "../components/CompanySelector";
 
 const Tab = createBottomTabNavigator<MainTabParamList>();
 
 export default function MainTabNavigator() {
+   
     return (
-        <Tab.Navigator>
+        <Tab.Navigator initialRouteName="Dashboard" screenOptions={{headerRight:()=>{
+            return <CompanySelector/>
+        }
+        }}>
             <Tab.Screen
                 name="Dashboard"
                 component={DashboardScreen}
                 options={{
-                    tabBarIcon: ({ color }) => (
-                        <Icon name="dashboard" color={color} size={24} />
+                    tabBarIcon: ({ color,size }) => (
+                        <Icon name="view-dashboard" color={color} size={size} />
                     ),
                 }}
             />
@@ -26,8 +31,8 @@ export default function MainTabNavigator() {
                 name="Bills"
                 component={BillNavigator}
                 options={{
-                    tabBarIcon: ({ color }) => (
-                        <Icon name="receipt" color={color} size={24} />
+                    tabBarIcon: ({ color,size }) => (
+                        <Icon name="receipt" color={color} size={size} />
                     ),
                 }}
             />
@@ -35,8 +40,8 @@ export default function MainTabNavigator() {
                 name="Accounting"
                 component={AccountingNavigator}
                 options={{
-                    tabBarIcon: ({ color }) => (
-                        <Icon name="account-balance" color={color} size={24} />
+                    tabBarIcon: ({ color,size }) => (
+                        <Icon name="wallet" color={color} size={size} />
                     ),
                 }}
             />
@@ -44,8 +49,8 @@ export default function MainTabNavigator() {
                 name="GST"
                 component={GSTNavigator}
                 options={{
-                    tabBarIcon: ({ color }) => (
-                        <Icon name="monetization-on" color={color} size={24} />
+                    tabBarIcon: ({ color,size }) => (
+                        <Icon name="hand-coin" color={color} size={size} />
                     ),
                 }}
             />
@@ -53,8 +58,8 @@ export default function MainTabNavigator() {
                 name="Reports"
                 component={ReportNavigator}
                 options={{
-                    tabBarIcon: ({ color }) => (
-                        <Icon name="assessment" color={color} size={24} />
+                    tabBarIcon: ({ color,size }) => (
+                        <Icon name="file-chart" color={color} size={size} />
                     ),
                 }}
             />

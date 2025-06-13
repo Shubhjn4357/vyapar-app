@@ -38,11 +38,7 @@
     "experiments": {
       "typedRoutes": true
     },
-    "androidNavigationBar":{
-      "visible":"immersive",
-      "barStyle":"dark-content",
-      "backgroundColor":"#000000"
-    },
+    
     "extra": {
       "router": {},
       "eas": {
