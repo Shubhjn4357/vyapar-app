@@ -40,6 +40,7 @@ export const loginApi = async (mobile: string, password: string): Promise<AuthRe
         });
         return data;
     } catch (error) {
+        console.log(error)
         throw new ApiError('Login failed', error);
     }
 };

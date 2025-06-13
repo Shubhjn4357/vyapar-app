@@ -24,6 +24,7 @@ client.interceptors.request.use(async (config) => {
 
 client.interceptors.response.use(
     (response) => {
+        // console.log('client',response.data)
         // Handle new standardized response format: { status: 'success'|'error', data?, message? }
         if (response.data && typeof response.data === 'object') {
             if ('status' in response.data) {
@@ -61,6 +62,7 @@ client.interceptors.response.use(
         };
     },
     (error) => {
+        // console.log('client', error)
         if (error.response?.status === 401) {
             throw new AuthError('Authentication failed');
         }

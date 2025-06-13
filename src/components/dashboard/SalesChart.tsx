@@ -38,7 +38,7 @@ export const SalesChart: React.FC<SalesChartProps> = ({ data, loading = false })
     const chartData = {
         labels: data.map(item => {
             // Format period for display (e.g., "Jan", "Feb", etc.)
-            const date = new Date(item.period);
+            const date = typeof item.period === 'string' ? new Date(item.period) : item.period;
             return date.toLocaleDateString('en-US', { month: 'short' });
         }),
         datasets: [

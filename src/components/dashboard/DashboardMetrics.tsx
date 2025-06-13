@@ -33,6 +33,7 @@ export const DashboardMetrics: React.FC<DashboardMetricsProps> = ({ metrics, loa
     };
 
     const formatPercentage = (value: number) => {
+        if (typeof value !== 'number' || isNaN(value)) return '0.0%';
         return `${value >= 0 ? '+' : ''}${value.toFixed(1)}%`;
     };
 
