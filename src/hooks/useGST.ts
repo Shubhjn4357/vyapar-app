@@ -31,12 +31,14 @@ export const useGSTTransactions = () => {
             setLoading(true);
             setError(null);
             const response = await gstApi.getGSTTransactions(params);
-            setTransactions(response.data.transactions);
-            setPagination({
-                page: response.data.page,
-                totalPages: response.data.totalPages,
-                total: response.data.total
-            });
+            if (response.status === "success" && response.data) {
+                setTransactions(response.data.transactions);
+                setPagination({
+                    page: response.data.page,
+                    totalPages: response.data.totalPages,
+                    total: response.data.total
+                });
+            }
         } catch (err: any) {
             setError(err.message || 'Failed to fetch GST transactions');
         } finally {
@@ -49,9 +51,11 @@ export const useGSTTransactions = () => {
             setLoading(true);
             setError(null);
             const response = await gstApi.createGSTTransaction(transactionData);
-            const newTransaction = response.data;
-            setTransactions(prev => [newTransaction, ...prev]);
-            return newTransaction;
+            if (response.status === "success" && response.data) {
+                setTransactions(prev => [response.data, ...prev]);
+                return response.data;
+            }
+            return null;
         } catch (err: any) {
             setError(err.message || 'Failed to create GST transaction');
             return null;
@@ -65,9 +69,11 @@ export const useGSTTransactions = () => {
             setLoading(true);
             setError(null);
             const response = await gstApi.updateGSTTransaction(id, transactionData);
-            const updatedTransaction = response.data;
-            setTransactions(prev => prev.map(transaction => transaction.id === id ? updatedTransaction : transaction));
-            return updatedTransaction;
+            if (response.status === "success" && response.data) {
+                setTransactions(prev => prev.map(transaction => transaction.id === id ? response.data : transaction));
+                return response.data;
+            }
+            return null;
         } catch (err: any) {
             setError(err.message || 'Failed to update GST transaction');
             return null;
@@ -122,7 +128,7 @@ export const useGSTSummary = () => {
             setLoading(true);
             setError(null);
             const response = await gstApi.getGSTSummary(params);
-            setSummary(response.data);
+            setSummary(response.status === "success" ? response.data : null);
         } catch (err: any) {
             setError(err.message || 'Failed to fetch GST summary');
         } finally {
@@ -153,7 +159,7 @@ export const useGSTR1 = () => {
             setLoading(true);
             setError(null);
             const response = await gstApi.getGSTR1Data(period);
-            setData(response.data);
+            setData(response.status === "success" ? response.data : null);
         } catch (err: any) {
             setError(err.message || 'Failed to fetch GSTR-1 data');
         } finally {
@@ -166,7 +172,7 @@ export const useGSTR1 = () => {
             setLoading(true);
             setError(null);
             const response = await gstApi.generateGSTR1JSON(period);
-            return response.data.downloadUrl;
+            return response.status === "success" && response.data ? response.data.downloadUrl : null;
         } catch (err: any) {
             setError(err.message || 'Failed to generate GSTR-1 JSON');
             return null;
@@ -194,7 +200,7 @@ export const useGSTR2 = () => {
             setLoading(true);
             setError(null);
             const response = await gstApi.getGSTR2Data(period);
-            setData(response.data);
+            setData(response.status === "success" ? response.data : null);
         } catch (err: any) {
             setError(err.message || 'Failed to fetch GSTR-2 data');
         } finally {
@@ -220,7 +226,7 @@ export const useGSTR3B = () => {
             setLoading(true);
             setError(null);
             const response = await gstApi.getGSTR3BData(period);
-            setData(response.data);
+            setData(response.status === "success" ? response.data : null);
         } catch (err: any) {
             setError(err.message || 'Failed to fetch GSTR-3B data');
         } finally {
@@ -233,7 +239,7 @@ export const useGSTR3B = () => {
             setLoading(true);
             setError(null);
             const response = await gstApi.generateGSTR3BJSON(period);
-            return response.data.downloadUrl;
+            return response.status === "success" && response.data ? response.data.downloadUrl : null;
         } catch (err: any) {
             setError(err.message || 'Failed to generate GSTR-3B JSON');
             return null;
@@ -260,7 +266,7 @@ export const useGSTValidation = () => {
             setLoading(true);
             setError(null);
             const response = await gstApi.validateGSTIN(gstin);
-            return response.data;
+            return response.status === "success" ? response.data : null;
         } catch (err: any) {
             setError(err.message || 'Failed to validate GSTIN');
             return null;
@@ -285,7 +291,7 @@ export const useEInvoice = () => {
             setLoading(true);
             setError(null);
             const response = await gstApi.getEInvoiceStatus(transactionId);
-            return response.data;
+            return response.status === "success" ? response.data : null;
         } catch (err: any) {
             setError(err.message || 'Failed to get e-Invoice status');
             return null;
@@ -299,7 +305,7 @@ export const useEInvoice = () => {
             setLoading(true);
             setError(null);
             const response = await gstApi.generateEInvoice(transactionId);
-            return response.data;
+            return response.status === "success" ? response.data : null;
         } catch (err: any) {
             setError(err.message || 'Failed to generate e-Invoice');
             return null;
@@ -313,7 +319,7 @@ export const useEInvoice = () => {
             setLoading(true);
             setError(null);
             const response = await gstApi.cancelEInvoice(transactionId, reason);
-            return response.data;
+            return response.status === "success" ? response.data : null;
         } catch (err: any) {
             setError(err.message || 'Failed to cancel e-Invoice');
             return null;

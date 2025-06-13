@@ -18,6 +18,7 @@ export const gstApi = {
         endDate?: string;
         partyGstin?: string;
         search?: string;
+        companyId?: string;
     }): Promise<ApiResponse<{
         transactions: GSTTransaction[];
         total: number;
@@ -25,31 +26,31 @@ export const gstApi = {
         totalPages: number;
     }>> => {
         const response = await client.get('/gst/transactions', { params });
-        return response.data;
+        return response as unknown as any;
     },
 
     // Get GST transaction by ID
     getGSTTransactionById: async (id: string): Promise<ApiResponse<GSTTransaction>> => {
         const response = await client.get(`/gst/transactions/${id}`);
-        return response.data;
+        return response as unknown as any;
     },
 
     // Create GST transaction
     createGSTTransaction: async (transactionData: Omit<GSTTransaction, 'id' | 'createdAt' | 'updatedAt'>): Promise<ApiResponse<GSTTransaction>> => {
         const response = await client.post('/gst/transactions', transactionData);
-        return response.data;
+        return response as unknown as any;
     },
 
     // Update GST transaction
     updateGSTTransaction: async (id: string, transactionData: Partial<GSTTransaction>): Promise<ApiResponse<GSTTransaction>> => {
         const response = await client.put(`/gst/transactions/${id}`, transactionData);
-        return response.data;
+        return response as unknown as any;
     },
 
     // Delete GST transaction
     deleteGSTTransaction: async (id: string): Promise<ApiResponse<void>> => {
         const response = await client.delete(`/gst/transactions/${id}`);
-        return response.data;
+        return response as unknown as any;
     },
 
     // Get GST summary
@@ -59,25 +60,25 @@ export const gstApi = {
         period?: string; // YYYY-MM format
     }): Promise<ApiResponse<GSTSummary>> => {
         const response = await client.get('/gst/summary', { params });
-        return response.data;
+        return response as unknown as any;
     },
 
     // Get GSTR-1 data
     getGSTR1Data: async (period: string): Promise<ApiResponse<GSTR1Data>> => {
         const response = await client.get(`/gst/gstr1/${period}`);
-        return response.data;
+        return response as unknown as any;
     },
 
     // Get GSTR-2 data
     getGSTR2Data: async (period: string): Promise<ApiResponse<GSTR2Data>> => {
         const response = await client.get(`/gst/gstr2/${period}`);
-        return response.data;
+        return response as unknown as any;
     },
 
     // Get GSTR-3B data
     getGSTR3BData: async (period: string): Promise<ApiResponse<GSTR3BData>> => {
         const response = await client.get(`/gst/gstr3b/${period}`);
-        return response.data;
+        return response as unknown as any;
     },
 
     // Generate GSTR-1 JSON file
@@ -86,7 +87,7 @@ export const gstApi = {
         fileName: string;
     }>> => {
         const response = await client.post(`/gst/gstr1/${period}/generate`);
-        return response.data;
+        return response as unknown as any;
     },
 
     // Generate GSTR-3B JSON file
@@ -95,7 +96,7 @@ export const gstApi = {
         fileName: string;
     }>> => {
         const response = await client.post(`/gst/gstr3b/${period}/generate`);
-        return response.data;
+        return response as unknown as any;
     },
 
     // Validate GSTIN
@@ -107,14 +108,14 @@ export const gstApi = {
         registrationDate?: string;
     }>> => {
         const response = await client.post('/gst/validate-gstin', { gstin });
-        return response.data;
+        return response as unknown as any;
     },
 
     // Get HSN-wise summary
     getHSNSummary: async (params?: {
         startDate?: string;
         endDate?: string;
-        type?: 'sale' | 'purchase';
+        type?: 'sale' | 'purchase' | 'credit_note' | 'debit_note';
     }): Promise<ApiResponse<{
         hsnData: Array<{
             hsnCode: string;
@@ -130,7 +131,7 @@ export const gstApi = {
         totalTaxAmount: number;
     }>> => {
         const response = await client.get('/gst/hsn-summary', { params });
-        return response.data;
+        return response as unknown as any;
     },
 
     // Get GST reconciliation data
@@ -161,7 +162,7 @@ export const gstApi = {
         }>;
     }>> => {
         const response = await client.get(`/gst/reconciliation/${period}`);
-        return response.data;
+        return response as unknown as any;
     },
 
     // Get e-Invoice status
@@ -175,7 +176,7 @@ export const gstApi = {
         errors?: string[];
     }>> => {
         const response = await client.get(`/gst/e-invoice/${transactionId}/status`);
-        return response.data;
+        return response as unknown as any;
     },
 
     // Generate e-Invoice
@@ -187,7 +188,7 @@ export const gstApi = {
         signedInvoice: string;
     }>> => {
         const response = await client.post(`/gst/e-invoice/${transactionId}/generate`);
-        return response.data;
+        return response as unknown as any;
     },
 
     // Cancel e-Invoice
@@ -196,7 +197,7 @@ export const gstApi = {
         status: string;
     }>> => {
         const response = await client.post(`/gst/e-invoice/${transactionId}/cancel`, { reason });
-        return response.data;
+        return response as unknown as any;
     },
 
     // Get GST rates
@@ -212,7 +213,7 @@ export const gstApi = {
         }>;
     }>> => {
         const response = await client.get('/gst/rates', { params: { hsnCode } });
-        return response.data;
+        return response as unknown as any;
     },
 
     // Bulk import GST transactions
@@ -229,6 +230,6 @@ export const gstApi = {
                 'Content-Type': 'multipart/form-data',
             },
         });
-        return response.data;
+        return response as unknown as any;
     }
 };

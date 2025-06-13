@@ -25,12 +25,14 @@ export const useBills = () => {
             setLoading(true);
             setError(null);
             const response = await billsApi.getBills(params);
-            setBills(response.data.bills);
-            setPagination({
-                page: response.data.page,
-                totalPages: response.data.totalPages,
-                total: response.data.total
-            });
+            if (response.status === "success" && response.data) {
+                setBills(response.data.bills);
+                setPagination({
+                    page: response.data.page,
+                    totalPages: response.data.totalPages,
+                    total: response.data.total
+                });
+            }
         } catch (err: any) {
             setError(err.message || 'Failed to fetch bills');
         } finally {
@@ -43,9 +45,11 @@ export const useBills = () => {
             setLoading(true);
             setError(null);
             const response = await billsApi.createBill(billData);
-            const newBill = response.data;
-            setBills(prev => [newBill, ...prev]);
-            return newBill;
+            if (response.status === "success" && response.data) {
+                setBills(prev => [response.data, ...prev]);
+                return response.data;
+            }
+            return null;
         } catch (err: any) {
             setError(err.message || 'Failed to create bill');
             return null;
@@ -59,9 +63,11 @@ export const useBills = () => {
             setLoading(true);
             setError(null);
             const response = await billsApi.updateBill(id, billData);
-            const updatedBill = response.data;
-            setBills(prev => prev.map(bill => bill.id === id ? updatedBill : bill));
-            return updatedBill;
+            if (response.status === "success" && response.data) {
+                setBills(prev => prev.map(bill => bill.id === id ? response.data : bill));
+                return response.data;
+            }
+            return null;
         } catch (err: any) {
             setError(err.message || 'Failed to update bill');
             return null;
@@ -95,8 +101,9 @@ export const useBills = () => {
             setLoading(true);
             setError(null);
             const response = await billsApi.markAsPaid(id, paymentData);
-            const updatedBill = response.data;
-            setBills(prev => prev.map(bill => bill.id === id ? updatedBill : bill));
+            if (response.status === "success" && response.data) {
+                setBills(prev => prev.map(bill => bill.id === id ? response.data : bill));
+            }
             return true;
         } catch (err: any) {
             setError(err.message || 'Failed to mark bill as paid');
@@ -130,7 +137,7 @@ export const useBills = () => {
             setLoading(true);
             setError(null);
             const response = await billsApi.generatePDF(id);
-            return response.data.pdfUrl;
+            return response.status === "success" && response.data ? response.data.pdfUrl : null;
         } catch (err: any) {
             setError(err.message || 'Failed to generate PDF');
             return null;
@@ -173,7 +180,7 @@ export const useBillSummary = () => {
             setLoading(true);
             setError(null);
             const response = await billsApi.getBillSummary(params);
-            setSummary(response.data);
+            setSummary(response.status === "success" ? response.data : null);
         } catch (err: any) {
             setError(err.message || 'Failed to fetch bill summary');
         } finally {
@@ -206,7 +213,7 @@ export const useBillById = (id: string) => {
             setLoading(true);
             setError(null);
             const response = await billsApi.getBillById(id);
-            setBill(response.data);
+            setBill(response.status === "success" ? response.data : null);
         } catch (err: any) {
             setError(err.message || 'Failed to fetch bill');
         } finally {

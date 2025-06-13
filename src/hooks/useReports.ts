@@ -23,7 +23,7 @@ export const useDashboardMetrics = () => {
             setLoading(true);
             setError(null);
             const response = await reportsApi.getDashboardMetrics(params);
-            setMetrics(response.data);
+            setMetrics(response.status === "success" ? response.data : null);
         } catch (err: any) {
             setError(err.message || 'Failed to fetch dashboard metrics');
         } finally {
@@ -56,7 +56,7 @@ export const useSalesReport = () => {
             setLoading(true);
             setError(null);
             const response = await reportsApi.getSalesReport(params);
-            setReport(response.data);
+            setReport(response.status === "success" ? response.data : null);
         } catch (err: any) {
             setError(err.message || 'Failed to fetch sales report');
         } finally {
@@ -85,7 +85,7 @@ export const usePurchaseReport = () => {
             setLoading(true);
             setError(null);
             const response = await reportsApi.getPurchaseReport(params);
-            setReport(response.data);
+            setReport(response.status === "success" ? response.data : null);
         } catch (err: any) {
             setError(err.message || 'Failed to fetch purchase report');
         } finally {
@@ -112,7 +112,7 @@ export const useTaxReport = () => {
             setLoading(true);
             setError(null);
             const response = await reportsApi.getTaxReport(params);
-            setReport(response.data);
+            setReport(response.status === "success" ? response.data : null);
         } catch (err: any) {
             setError(err.message || 'Failed to fetch tax report');
         } finally {
@@ -139,7 +139,7 @@ export const useProfitLossReport = () => {
             setLoading(true);
             setError(null);
             const response = await reportsApi.getProfitLossReport(params);
-            setReport(response.data);
+            setReport(response.status === "success" ? response.data : null);
         } catch (err: any) {
             setError(err.message || 'Failed to fetch profit & loss report');
         } finally {
@@ -166,7 +166,7 @@ export const useCashFlowReport = () => {
             setLoading(true);
             setError(null);
             const response = await reportsApi.getCashFlowReport(params);
-            setReport(response.data);
+            setReport(response.status === "success" ? response.data : null);
         } catch (err: any) {
             setError(err.message || 'Failed to fetch cash flow report');
         } finally {
@@ -211,7 +211,7 @@ export const useBusinessInsights = () => {
             setLoading(true);
             setError(null);
             const response = await reportsApi.getBusinessInsights(params);
-            setInsights(response.data);
+            setInsights(response.status === "success" ? response.data : null);
         } catch (err: any) {
             setError(err.message || 'Failed to fetch business insights');
         } finally {
@@ -245,7 +245,7 @@ export const useReportExport = () => {
             setLoading(true);
             setError(null);
             const response = await reportsApi.exportReport(reportType, format, params);
-            return response.data.downloadUrl;
+            return response.status === "success" && response.data ? response.data.downloadUrl : null;
         } catch (err: any) {
             setError(err.message || 'Failed to export report');
             return null;

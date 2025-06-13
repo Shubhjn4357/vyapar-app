@@ -6,6 +6,8 @@ import BillNavigator from "./BillNavigator";
 import AccountingNavigator from "./AccountingNavigator";
 import GSTNavigator from "./GSTNavigator";
 import ReportNavigator from "./ReportNavigator";
+import ProductNavigator from "./ProductNavigator";
+import PaymentNavigator from "./PaymentNavigator";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import CompanySelector from "../components/CompanySelector";
 
@@ -37,11 +39,20 @@ export default function MainTabNavigator() {
                 }}
             />
             <Tab.Screen
-                name="Accounting"
-                component={AccountingNavigator}
+                name="Products"
+                component={ProductNavigator}
                 options={{
                     tabBarIcon: ({ color,size }) => (
-                        <Icon name="wallet" color={color} size={size} />
+                        <Icon name="cube" color={color} size={size} />
+                    ),
+                }}
+            />
+            <Tab.Screen
+                name="Payments"
+                component={PaymentNavigator}
+                options={{
+                    tabBarIcon: ({ color,size }) => (
+                        <Icon name="credit-card" color={color} size={size} />
                     ),
                 }}
             />

@@ -21,13 +21,19 @@ export type AuthStackParamList = {
   Main: NavigatorScreenParams<MainTabParamList>;
 };
 
+export type CompanyStackParamList = {
+  CompanyList: undefined;
+  CreateCompany: undefined;
+  EditCompany: { companyId: string };
+};
+
 
 
 export type MainTabParamList = {
-  
   Dashboard: undefined;
   Bills: NavigatorScreenParams<BillStackParamList>;
-  Accounting: NavigatorScreenParams<AccountingStackParamList>;
+  Products: NavigatorScreenParams<ProductStackParamList>;
+  Payments: NavigatorScreenParams<PaymentStackParamList>;
   GST: NavigatorScreenParams<GSTStackParamList>;
   Reports: NavigatorScreenParams<ReportStackParamList>;
 };
@@ -53,6 +59,20 @@ export type GSTStackParamList = {
   GSTR2: { month: string; year: string };
   GSTR3B: { month: string; year: string };
   GSTReconciliation: undefined;
+};
+
+export type ProductStackParamList = {
+  ProductsList: undefined;
+  ProductDetails: { productId: string };
+  AddProduct: undefined;
+  EditProduct: { productId: string };
+};
+
+export type PaymentStackParamList = {
+  PaymentsList: undefined;
+  PaymentDetails: { paymentId: string };
+  AddPayment: undefined;
+  EditPayment: { paymentId: string };
 };
 
 export type ReportStackParamList = {

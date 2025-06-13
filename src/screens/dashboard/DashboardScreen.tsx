@@ -7,10 +7,11 @@ import { useGSTSummary } from '../../hooks/useGST';
 import { DashboardMetrics } from '../../components/dashboard/DashboardMetrics';
 import { RecentTransactions } from '../../components/dashboard/RecentTransactions';
 import { SalesChart } from '../../components/dashboard/SalesChart';
+import { EnhancedDashboard } from '../../components/dashboard/EnhancedDashboard';
 import { billsApi } from '../../api/bills';
 import { Bill } from '../../types/bill';
 
-export const DashboardScreen = () => {
+export const DashboardScreen = ({ navigation }: { navigation: any }) => {
   const theme = useTheme();
   const { metrics, loading: metricsLoading, fetchMetrics } = useDashboardMetrics();
   const { bills, loading: billsLoading, fetchBills } = useBills();
@@ -106,6 +107,9 @@ export const DashboardScreen = () => {
           onBillPress={handleBillPress}
           loading={billsLoading}
         />
+
+        {/* Enhanced Dashboard Features */}
+        <EnhancedDashboard navigation={navigation} />
 
         {/* Quick Actions */}
         <Card style={styles.quickActionsCard}>

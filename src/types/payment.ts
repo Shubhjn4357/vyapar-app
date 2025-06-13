@@ -2,10 +2,10 @@ export interface Payment {
     id: string;
     billId: string;
     companyId: string;
-    amount: string;
+    amount: number;
     date: string;
-    mode: string;
-    status: string;
+    method: string; // Changed from 'mode' to 'method' to match server schema
+    status: 'pending' | 'completed' | 'failed';
     reference?: string;
     notes?: string;
     metadata?: any;
