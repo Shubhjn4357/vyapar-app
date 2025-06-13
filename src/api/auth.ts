@@ -12,12 +12,22 @@ interface AuthResponse {
 }
 
 interface OTPResponse {
-    otpId: string;
-    expiresAt: string;
+    status: string;
+    data: {
+        otpId: string;
+        expiresAt: string;
+    };
+    message: string;
 }
 
-interface VerifyOTPResponse extends AuthResponse {
-    isNewUser: boolean;
+interface VerifyOTPResponse {
+    status: string;
+    data: {
+        token: string;
+        user: User;
+        resetToken?: string;
+    };
+    message: string;
 }
 
 interface RefreshTokenResponse {
@@ -48,14 +58,15 @@ export const loginApi = async (mobile: string, password: string): Promise<{token
         throw new ApiError('Login failed', error);
     }
 };
-export const resetPasswordApi= async (mobile: string, password: string,otp:string): Promise<{token: string, user: User}> => {
+export const resetPassword = async (mobile: string, token: string, password: string, otpId: string): Promise<{ status: string; message: string }> => {
     try {
-        const { data } = await client.post<AuthResponse>('/auth/reset-password', {
+        const { data } = await client.post('/auth/reset-password', {
             mobile,
+            token,
             password,
-            otp
+            otpId
         });
-        return data.data;
+        return data;
     } catch (error) {
         throw new ApiError('Reset password failed', error);
     }
@@ -120,11 +131,12 @@ export const requestOTP = async (mobile: string): Promise<OTPResponse> => {
     }
 };
 
-export const verifyOTP = async (mobile: string, otp: string): Promise<VerifyOTPResponse> => {
+export const verifyOTP = async (mobile: string, otp: string, otpId: string): Promise<VerifyOTPResponse> => {
     try {
         const { data } = await client.post<VerifyOTPResponse>('/auth/otp/verify', {
             mobile,
-            otp
+            otp,
+            otpId
         });
         return data;
     } catch (error) {

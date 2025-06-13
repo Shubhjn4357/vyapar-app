@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
-import { fetchProfileApi, loginApi, registerApi, requestOTP, resetPasswordApi, verifyOTP, completeProfileApi } from "../api/auth";
+import { fetchProfileApi, loginApi, registerApi, requestOTP, resetPassword, verifyOTP, completeProfileApi } from "../api/auth";
 import * as SecureStore from "expo-secure-store";
 import { User } from "../types/user";
 import { Company } from "../types/company";
@@ -17,12 +17,13 @@ type AuthContextType = AuthState & {
     setCompany: (c: Company | null) => void;
     logout: () => Promise<void>;
     refreshToken: () => Promise<void>;
-    login: (mobile: string, password: string) => Promise<void>;
+    login: (token: string, user: User) => Promise<void>;
     resetPassword: (mobile: string, otp: string, password: string) => Promise<void>;
     register: (data: { name: string; mobile: string; email: string; password: string }) => Promise<void>;
     forgotPassword: (mobile: string) => Promise<string>;
-    verifyOtp: (mobile: string, otp: string) => Promise<void>;
+    verifyOtp: (mobile: string, otp: string, otpId: string) => Promise<any>;
     completeProfile: (profileData: { name?: string; email?: string }) => Promise<void>;
+    completeRegistration: (token: string, user: User) => Promise<void>;
     clearError: () => void;
 };
 
@@ -88,31 +89,48 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         };
         loadUserData();
     }, []);
-    const resetPassword = useCallback(async (mobile: string, otp: string, password: string) => {
+    const resetPasswordHandler = useCallback(async (mobile: string, otp: string, password: string) => {
         setState(prev => ({ ...prev, isLoading: true, error: null }));
         try {
-            await resetPasswordApi(mobile, password,otp);
+            await resetPassword(mobile, "", password, otp);
             setState(prev => ({ ...prev, isLoading: false }));
         } catch (error: any) {
             setError(error?.message || "Failed to reset password");
             throw error;
         }
     }, []);
-    const login = useCallback(async (mobile: string, password: string) => {
+    const login = useCallback(async (token: string, user: User) => {
         setState(prev => ({ ...prev, isLoading: true, error: null }));
         try {
-            const response = await loginApi(mobile, password);
-            await SecureStore.setItemAsync("token", response.token);
+            await SecureStore.setItemAsync("token", token);
             setState(prev => ({
                 ...prev,
-                token: response.token,
-                user: response.user,
+                token,
+                user,
                 isAuthenticated: true,
                 isLoading: false,
                 error: null
             }));
         } catch (error: any) {
             setError(error?.message || "Login failed");
+            throw error;
+        }
+    }, []);
+
+    const completeRegistration = useCallback(async (token: string, user: User) => {
+        setState(prev => ({ ...prev, isLoading: true, error: null }));
+        try {
+            await SecureStore.setItemAsync("token", token);
+            setState(prev => ({
+                ...prev,
+                token,
+                user,
+                isAuthenticated: true,
+                isLoading: false,
+                error: null
+            }));
+        } catch (error: any) {
+            setError(error?.message || "Registration completion failed");
             throw error;
         }
     }, []);
@@ -141,18 +159,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         try {
             const response=await requestOTP(mobile);
             setState(prev => ({ ...prev, isLoading: false }));
-            return response.otpId
+            return response.data.otpId
         } catch (error: any) {
             setError(error?.message || "Failed to send OTP");
             throw error;
         }
     }, []);
 
-    const verifyOtp = useCallback(async (mobile: string, otp: string) => {
+    const verifyOtp = useCallback(async (mobile: string, otp: string, otpId: string) => {
         setState(prev => ({ ...prev, isLoading: true, error: null }));
         try {
-            await verifyOTP(mobile, otp);
+            const response = await verifyOTP(mobile, otp, otpId);
             setState(prev => ({ ...prev, isLoading: false }));
+            return response;
         } catch (error: any) {
             setError(error?.message || "OTP verification failed");
             throw error;
@@ -190,9 +209,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             login,
             register,
             forgotPassword,
-            resetPassword,
+            resetPassword: resetPasswordHandler,
             verifyOtp,
             completeProfile,
+            completeRegistration,
             clearError
         }}>
             {children}

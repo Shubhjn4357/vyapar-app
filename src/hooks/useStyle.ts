@@ -39,6 +39,7 @@ type Style = {
     input: ViewStyle & TextStyle;
     inputFocused: ViewStyle;
     inputError: ViewStyle;
+    eyeIcon: ViewStyle;
     inputLabel: TextStyle;
     inputHelper: TextStyle;
     
@@ -304,6 +305,12 @@ const styles: StylesFn = (theme) => ({
     inputError: {
         borderColor: theme.error,
         borderWidth: 2,
+    },
+    eyeIcon: {
+        position: 'absolute',
+        right: 12,
+        top: 12,
+        padding: 4,
     },
     inputLabel: {
         fontSize: 14,

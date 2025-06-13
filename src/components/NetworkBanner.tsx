@@ -1,16 +1,47 @@
 import React from 'react';
-import { Banner } from 'react-native-paper';
-import { useNetwork } from '../contexts/NetworkContext';
+import { View, Text, StyleSheet } from 'react-native';
+import { useOffline } from '../contexts/OfflineContext';
+import { useTheme } from '../contexts/ThemeContext';
 
 export function NetworkBanner() {
-    const { isConnected } = useNetwork();
+    const { isOnline, pendingActionsCount } = useOffline();
+    const { theme } = useTheme();
+
+    if (isOnline && pendingActionsCount === 0) {
+        return null;
+    }
 
     return (
-        <Banner
-            visible={isConnected === false}
-            icon="wifi-off"
-        >
-            No internet connection
-        </Banner>
+        <View style={[
+            styles.banner, 
+            { 
+                backgroundColor: isOnline ? theme.warningContainer : theme.errorContainer 
+            }
+        ]}>
+            <Text style={[
+                styles.text, 
+                { 
+                    color: isOnline ? theme.onWarningContainer : theme.onErrorContainer 
+                }
+            ]}>
+                {!isOnline 
+                    ? "No internet connection" 
+                    : `${pendingActionsCount} actions pending sync`
+                }
+            </Text>
+        </View>
     );
 }
+
+const styles = StyleSheet.create({
+    banner: {
+        paddingVertical: 8,
+        paddingHorizontal: 16,
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    text: {
+        fontSize: 14,
+        fontWeight: '500',
+    },
+});

@@ -38,7 +38,15 @@ export default function LoginScreen({ navigation }: Props) {
     }, []);
 
     const onSubmit = async (data: LoginForm) => {
-        await login(data.mobile, data.password);
+        try {
+            // Call the login API directly
+            const { loginApi } = await import('../../api/auth');
+            const response = await loginApi(data.mobile, data.password);
+            await login(response.token, response.user);
+        } catch (error) {
+            console.error('Login failed:', error);
+            // Error handling is done by the auth context
+        }
     };
     return (
         <KeyboardAvoidingView

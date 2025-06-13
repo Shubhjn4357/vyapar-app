@@ -1,11 +1,24 @@
-import React, { useState } from "react";
-import { View, Text, TextInput, TouchableOpacity, ScrollView, Alert } from "react-native";
+import React, { useState, useEffect, useRef } from "react";
+import { 
+    View, 
+    Text, 
+    TextInput, 
+    TouchableOpacity, 
+    ScrollView, 
+    KeyboardAvoidingView,
+    Platform,
+    Animated,
+    Alert 
+} from "react-native";
 import { useForm, Controller } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { CompleteProfileScreenProps } from "../../types/navigation";
 import { useAuth } from "../../contexts/AuthContext";
 import { useStyle } from "../../hooks/useStyle";
 import { useTheme } from "../../contexts/ThemeContext";
+import { useOffline } from "../../contexts/OfflineContext";
+import { NavigationHelpers } from "../../services/NavigationService";
 import Loader from "../../components/Loader";
 
 const profileSchema = z.object({
@@ -15,8 +28,10 @@ const profileSchema = z.object({
 
 type ProfileForm = z.infer<typeof profileSchema>;
 
-export default function CompleteProfileScreen() {
+export default function CompleteProfileScreen({ navigation, route }: CompleteProfileScreenProps) {
+    const { userId, fromAuth } = route.params || {};
     const { completeProfile, isLoading, error, user } = useAuth();
+    const { isOnline } = useOffline();
     const styles = useStyle();
     const { theme } = useTheme();
     const [focusedField, setFocusedField] = useState<string | null>(null);

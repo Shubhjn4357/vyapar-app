@@ -43,7 +43,11 @@ export default function RegisterScreen({ navigation }: props) {
             if (!response) {
                 throw new Error("Failed to send OTP. Please try again.");
             }
-            navigation.navigate("OTPVerification", { mobile: data.mobile, otpId: response.otpId });
+            navigation.navigate("OTPVerification", { 
+                mobile: data.mobile, 
+                otpId: response.data.otpId,
+                type: 'register'
+            });
         } catch (error) {
             console.log(error);
             alert("Registration failed. Please try again.");
