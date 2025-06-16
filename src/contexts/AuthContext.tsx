@@ -1,8 +1,12 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
 import { fetchProfileApi, loginApi, registerApi, requestOTP, resetPassword, verifyOTP, completeProfileApi } from "../api/auth";
 import * as SecureStore from "expo-secure-store";
+import * as Google from 'expo-auth-session/providers/google';
+import * as Facebook from 'expo-auth-session/providers/facebook';
 import { User } from "../types/user";
 import { Company } from "../types/company";
+import { Platform } from "react-native";
+import * as Device from 'expo-device';
 
 type AuthState = {
     user: User | null;
@@ -11,6 +15,8 @@ type AuthState = {
     isLoading: boolean;
     error: string | null;
     isAuthenticated: boolean;
+    isGuest: boolean;
+    authMethod: 'email' | 'google' | 'facebook' | 'guest' | null;
 };
 
 type AuthContextType = AuthState & {
@@ -26,6 +32,15 @@ type AuthContextType = AuthState & {
     completeProfile: (profileData: { name?: string; email?: string }) => Promise<void>;
     completeRegistration: (token: string, user: User) => Promise<void>;
     clearError: () => void;
+    // New authentication methods
+    loginAsGuest: () => Promise<void>;
+    loginWithGoogle: () => Promise<void>;
+    loginWithFacebook: () => Promise<void>;
+    sendEmailOTP: (email: string) => Promise<void>;
+    sendSMSOTP: (mobile: string) => Promise<void>;
+    verifyEmailOTP: (email: string, otp: string) => Promise<void>;
+    verifyMobileOTP: (mobile: string, otp: string) => Promise<{ token: string; user: User; isNewUser: boolean }>;
+    convertGuestToUser: (data: { name: string; email?: string; mobile?: string; password?: string }) => Promise<void>;
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -37,7 +52,23 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         company: null,
         isLoading: true,
         error: null,
-        isAuthenticated: false
+        isAuthenticated: false,
+        isGuest: false,
+        authMethod: null
+    });
+
+    // Google OAuth configuration
+    const [googleRequest, googleResponse, googlePromptAsync] = Google.useAuthRequest({
+        clientId: Platform.select({
+            ios: process.env.EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID,
+            android: process.env.EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID,
+            web: process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID,
+        }),
+    });
+
+    // Facebook OAuth configuration
+    const [facebookRequest, facebookResponse, facebookPromptAsync] = Facebook.useAuthRequest({
+        clientId: process.env.EXPO_PUBLIC_FACEBOOK_APP_ID || '',
     });
 
     const setError = (error: string | null) =>
@@ -197,8 +228,242 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }
     }, [state.token]);
 
+    // New authentication methods
+    const loginAsGuest = useCallback(async () => {
+        setState(prev => ({ ...prev, isLoading: true, error: null }));
+        try {
+            const deviceId = Device.osInternalBuildId || `${Platform.OS}_${Date.now()}`;
+            const deviceInfo = {
+                platform: Platform.OS,
+                version: Platform.Version.toString(),
+                model: Device.modelName || 'Unknown'
+            };
+
+            const response = await fetch(`${process.env.EXPO_PUBLIC_API_URL}/api/auth/guest`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ deviceId, deviceInfo })
+            });
+
+            const data = await response.json();
+            if (!response.ok) throw new Error(data.message);
+
+            await SecureStore.setItemAsync("token", data.data.token);
+            setState(prev => ({
+                ...prev,
+                token: data.data.token,
+                user: data.data.user,
+                isAuthenticated: true,
+                isGuest: true,
+                authMethod: 'guest',
+                isLoading: false,
+                error: null
+            }));
+        } catch (error: any) {
+            setError(error?.message || "Guest login failed");
+            throw error;
+        }
+    }, []);
+
+    const loginWithGoogle = useCallback(async () => {
+        setState(prev => ({ ...prev, isLoading: true, error: null }));
+        try {
+            const result = await googlePromptAsync();
+            if (result?.type === 'success' && result.authentication?.idToken) {
+                const response = await fetch(`${process.env.EXPO_PUBLIC_API_URL}/api/auth/google/verify`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ idToken: result.authentication.idToken })
+                });
+
+                const data = await response.json();
+                if (!response.ok) throw new Error(data.message);
+
+                await SecureStore.setItemAsync("token", data.data.token);
+                setState(prev => ({
+                    ...prev,
+                    token: data.data.token,
+                    user: data.data.user,
+                    isAuthenticated: true,
+                    isGuest: false,
+                    authMethod: 'google',
+                    isLoading: false,
+                    error: null
+                }));
+            } else {
+                throw new Error('Google authentication cancelled');
+            }
+        } catch (error: any) {
+            setError(error?.message || "Google login failed");
+            throw error;
+        }
+    }, [googlePromptAsync]);
+
+    const loginWithFacebook = useCallback(async () => {
+        setState(prev => ({ ...prev, isLoading: true, error: null }));
+        try {
+            const result = await facebookPromptAsync();
+            if (result?.type === 'success' && result.authentication?.accessToken) {
+                const response = await fetch(`${process.env.EXPO_PUBLIC_API_URL}/api/auth/facebook/verify`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ accessToken: result.authentication.accessToken })
+                });
+
+                const data = await response.json();
+                if (!response.ok) throw new Error(data.message);
+
+                await SecureStore.setItemAsync("token", data.data.token);
+                setState(prev => ({
+                    ...prev,
+                    token: data.data.token,
+                    user: data.data.user,
+                    isAuthenticated: true,
+                    isGuest: false,
+                    authMethod: 'facebook',
+                    isLoading: false,
+                    error: null
+                }));
+            } else {
+                throw new Error('Facebook authentication cancelled');
+            }
+        } catch (error: any) {
+            setError(error?.message || "Facebook login failed");
+            throw error;
+        }
+    }, [facebookPromptAsync]);
+
+    const sendEmailOTP = useCallback(async (email: string) => {
+        setState(prev => ({ ...prev, isLoading: true, error: null }));
+        try {
+            const response = await fetch(`${process.env.EXPO_PUBLIC_API_URL}/api/auth/otp/send-email`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email })
+            });
+
+            const data = await response.json();
+            if (!response.ok) throw new Error(data.message);
+
+            setState(prev => ({ ...prev, isLoading: false }));
+        } catch (error: any) {
+            setError(error?.message || "Failed to send email OTP");
+            throw error;
+        }
+    }, []);
+
+    const sendSMSOTP = useCallback(async (mobile: string) => {
+        setState(prev => ({ ...prev, isLoading: true, error: null }));
+        try {
+            const response = await fetch(`${process.env.EXPO_PUBLIC_API_URL}/api/auth/otp/send-sms`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ mobile })
+            });
+
+            const data = await response.json();
+            if (!response.ok) throw new Error(data.message);
+
+            setState(prev => ({ ...prev, isLoading: false }));
+        } catch (error: any) {
+            setError(error?.message || "Failed to send SMS OTP");
+            throw error;
+        }
+    }, []);
+
+    const verifyEmailOTP = useCallback(async (email: string, otp: string) => {
+        setState(prev => ({ ...prev, isLoading: true, error: null }));
+        try {
+            const response = await fetch(`${process.env.EXPO_PUBLIC_API_URL}/api/auth/otp/verify-email`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, otp })
+            });
+
+            const data = await response.json();
+            if (!response.ok) throw new Error(data.message);
+
+            setState(prev => ({ ...prev, isLoading: false }));
+        } catch (error: any) {
+            setError(error?.message || "Email OTP verification failed");
+            throw error;
+        }
+    }, []);
+
+    const verifyMobileOTP = useCallback(async (mobile: string, otp: string) => {
+        setState(prev => ({ ...prev, isLoading: true, error: null }));
+        try {
+            const response = await fetch(`${process.env.EXPO_PUBLIC_API_URL}/api/auth/otp/verify-mobile`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ mobile, otp })
+            });
+
+            const data = await response.json();
+            if (!response.ok) throw new Error(data.message);
+
+            await SecureStore.setItemAsync("token", data.data.token);
+            setState(prev => ({
+                ...prev,
+                token: data.data.token,
+                user: data.data.user,
+                isAuthenticated: true,
+                isGuest: false,
+                authMethod: 'email',
+                isLoading: false,
+                error: null
+            }));
+
+            return data.data;
+        } catch (error: any) {
+            setError(error?.message || "Mobile OTP verification failed");
+            throw error;
+        }
+    }, []);
+
+    const convertGuestToUser = useCallback(async (data: { name: string; email?: string; mobile?: string; password?: string }) => {
+        setState(prev => ({ ...prev, isLoading: true, error: null }));
+        try {
+            if (!state.token) throw new Error("No token found");
+
+            const response = await fetch(`${process.env.EXPO_PUBLIC_API_URL}/api/auth/convert-guest`, {
+                method: 'POST',
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${state.token}`
+                },
+                body: JSON.stringify(data)
+            });
+
+            const responseData = await response.json();
+            if (!response.ok) throw new Error(responseData.message);
+
+            await SecureStore.setItemAsync("token", responseData.data.token);
+            setState(prev => ({
+                ...prev,
+                token: responseData.data.token,
+                user: responseData.data.user,
+                isGuest: false,
+                authMethod: 'email',
+                isLoading: false,
+                error: null
+            }));
+        } catch (error: any) {
+            setError(error?.message || "Failed to convert guest account");
+            throw error;
+        }
+    }, [state.token]);
+
     const logout = async () => {
-        setState(prev => ({ ...prev, token: null, user: null, company: null, isAuthenticated: false }));
+        setState(prev => ({ 
+            ...prev, 
+            token: null, 
+            user: null, 
+            company: null, 
+            isAuthenticated: false,
+            isGuest: false,
+            authMethod: null
+        }));
         await SecureStore.deleteItemAsync("token");
     };
 
@@ -216,7 +481,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             verifyOtp,
             completeProfile,
             completeRegistration,
-            clearError
+            clearError,
+            // New methods
+            loginAsGuest,
+            loginWithGoogle,
+            loginWithFacebook,
+            sendEmailOTP,
+            sendSMSOTP,
+            verifyEmailOTP,
+            verifyMobileOTP,
+            convertGuestToUser
         }}>
             {children}
         </AuthContext.Provider>
