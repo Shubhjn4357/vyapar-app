@@ -16,7 +16,7 @@ const Stack = createNativeStackNavigator<RootStackParamList>();
 
 function AuthenticatedNavigator() {
     const { user, company } = useAuth();
-
+    console.log({user, company})
     // If profile is not complete, show profile completion screen
     if (!user?.isProfileComplete) {
         return (

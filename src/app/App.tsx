@@ -21,13 +21,13 @@ const AppContent = () => {
             <StatusBar style={mode === "dark" ? 'light' : 'dark'} />
             <NetworkBanner />
             <PaperProvider theme={{ colors: { ...theme }, animation: { scale: 1.0, defaultAnimationDuration: 0.5 } }}>
-                <NavigationContainer ref={navigationRef}>
+                {/* <NavigationContainer ref={navigationRef}> */}
                     <AuthProvider>
                         <CompanyProvider>
                             <RootNavigator />
                         </CompanyProvider>
                     </AuthProvider>
-                </NavigationContainer>
+                {/* </NavigationContainer> */}
             </PaperProvider>
        </>
     );

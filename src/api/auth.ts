@@ -110,12 +110,13 @@ export const facebookLogin = async (accessToken: string): Promise<SocialAuthResp
 
 export const fetchProfileApi = async (token:string): Promise<User> => {
     try {
-        const { data } = await client.get<{status: string, data: User}>('/user/me', {
+        const { data } = await client.get<User>('/user/me', {
             headers: {
                 Authorization: `Bearer ${token}`
             }
         });
-        return data.data;
+        
+        return data;
     } catch (error) {
         console.log({error})
         throw new ApiError('Failed to fetch profile', error);

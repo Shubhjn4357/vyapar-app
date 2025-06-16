@@ -20,6 +20,7 @@ import { useTheme } from "../../contexts/ThemeContext";
 import { useOffline } from "../../contexts/OfflineContext";
 import { NavigationHelpers } from "../../services/NavigationService";
 import Loader from "../../components/Loader";
+import { Button } from "react-native-paper";
 
 const profileSchema = z.object({
     name: z.string().min(2, "Name must be at least 2 characters"),
@@ -30,7 +31,7 @@ type ProfileForm = z.infer<typeof profileSchema>;
 
 export default function CompleteProfileScreen({ navigation, route }: CompleteProfileScreenProps) {
     const { userId, fromAuth } = route.params || {};
-    const { completeProfile, isLoading, error, user } = useAuth();
+    const { completeProfile, isLoading, error, user, loadUserData } = useAuth();
     const { isOnline } = useOffline();
     const styles = useStyle();
     const { theme } = useTheme();
@@ -146,6 +147,7 @@ export default function CompleteProfileScreen({ navigation, route }: CompletePro
                     <Text style={[styles.caption, { textAlign: 'center', marginTop: 16 }]}>
                         This information helps us personalize your experience
                     </Text>
+                    <Button loading={isLoading} mode="contained" onPress={loadUserData}>Refresh</Button>
                 </View>
             </View>
         </ScrollView>

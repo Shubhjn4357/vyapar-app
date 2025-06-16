@@ -18,6 +18,7 @@ type AuthContextType = AuthState & {
     logout: () => Promise<void>;
     refreshToken: () => Promise<void>;
     login: (token: string, user: User) => Promise<void>;
+    loadUserData: () => Promise<void>;
     resetPassword: (mobile: string, otp: string, password: string) => Promise<void>;
     register: (data: { name: string; mobile: string; email: string; password: string }) => Promise<void>;
     forgotPassword: (mobile: string) => Promise<string>;
@@ -64,29 +65,30 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }
     };
 
-    useEffect(() => {
-        const loadUserData = async () => {
-            const token = await SecureStore.getItemAsync("token");
-            if (token) {
-                setState(prev => ({ ...prev, token }));
-                try {
-                    const userProfile = await fetchProfileApi(token);
-                    setState(prev => ({
-                        ...prev,
-                        user: userProfile,
-                        isAuthenticated: true,
-                        isLoading: false
-                    }));
-                } catch (error) {
-                    setError(error instanceof Error ? error.message : "Failed to load profile");
-                }
-                finally{
-                    setState(prev=>({...prev,isLoading:false}))
-                }
-            } else {
-                setState(prev => ({ ...prev, isLoading: false }));
+    const loadUserData = async () => {
+        const token = await SecureStore.getItemAsync("token");
+        if (token) {
+            setState(prev => ({ ...prev, token }));
+            try {
+                const userProfile = await fetchProfileApi(token);
+                
+                setState(prev => ({
+                    ...prev,
+                    user: userProfile,
+                    isAuthenticated: true,
+                    isLoading: false
+                }));
+            } catch (error) {
+                setError(error instanceof Error ? error.message : "Failed to load profile");
             }
-        };
+            finally{
+                setState(prev=>({...prev,isLoading:false}))
+            }
+        } else {
+            setState(prev => ({ ...prev, isLoading: false }));
+        }
+    };
+    useEffect(() => {
         loadUserData();
     }, []);
     const resetPasswordHandler = useCallback(async (mobile: string, otp: string, password: string) => {
@@ -209,6 +211,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             login,
             register,
             forgotPassword,
+            loadUserData,
             resetPassword: resetPasswordHandler,
             verifyOtp,
             completeProfile,

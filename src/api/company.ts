@@ -10,12 +10,12 @@ interface ApiResponse<T> {
 
 export const getMyCompanies = async (token: string): Promise<Company[]> => {
     try {
-        const {data} = await client.get<ApiResponse<Company[]>>(`/company/my`, {
+        const {data} = await client.get<Company[]>(`/company/my`, {
             headers: {
                 Authorization: `Bearer ${token}`
             }
         });
-        return data.data;
+        return data;
     } catch (error) {
         console.log('datafetch:', error)
         throw new ApiError('Failed to get Companies', error);

@@ -18,7 +18,6 @@ export default function CompanyListScreen({ navigation }: Props) {
     const { user } = useAuth();
     const styles = useStyle();
     const { theme } = useTheme();
-
     useEffect(() => {
         loadCompanies();
     }, []);
