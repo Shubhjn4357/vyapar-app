@@ -9,6 +9,7 @@
     "userInterfaceStyle": "dark",
     "newArchEnabled": true,
     "ios": {
+      "bundleIdentifier": "com.shubhjn.vyaparapp",
       "supportsTablet": true
     },
     "android": {
@@ -38,12 +39,12 @@
     "experiments": {
       "typedRoutes": true
     },
-    
     "extra": {
       "router": {},
       "eas": {
-        "projectId": "9d5ccb7c-830d-4366-a64b-aa5fa53377bd"
+        "projectId": "27288617-9bf0-4350-9f1e-cccc56ddb2ca"
       }
-    }
+    },
+    "owner": "shubhjn"
   }
 }

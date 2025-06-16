@@ -1,8 +1,8 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
 import { fetchProfileApi, loginApi, registerApi, requestOTP, resetPassword, verifyOTP, completeProfileApi } from "../api/auth";
 import * as SecureStore from "expo-secure-store";
-import * as Google from 'expo-auth-session/providers/google';
-import * as Facebook from 'expo-auth-session/providers/facebook';
+import { GoogleSignin, statusCodes, User as GoogleUser } from '@react-native-google-signin/google-signin';
+import { AccessToken, LoginManager, Profile as FBProfile } from 'react-native-fbsdk-next';
 import { User } from "../types/user";
 import { Company } from "../types/company";
 import { Platform } from "react-native";
@@ -20,7 +20,6 @@ type AuthState = {
 };
 
 type AuthContextType = AuthState & {
-    setCompany: (c: Company | null) => void;
     logout: () => Promise<void>;
     refreshToken: () => Promise<void>;
     login: (token: string, user: User) => Promise<void>;
@@ -43,7 +42,7 @@ type AuthContextType = AuthState & {
     convertGuestToUser: (data: { name: string; email?: string; mobile?: string; password?: string }) => Promise<void>;
 };
 
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
+export const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const [state, setState] = useState<AuthState>({
@@ -57,19 +56,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         authMethod: null
     });
 
-    // Google OAuth configuration
-    const [googleRequest, googleResponse, googlePromptAsync] = Google.useAuthRequest({
-        clientId: Platform.select({
-            ios: process.env.EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID,
-            android: process.env.EXPO_PUBLIC_GOOGLE_ANDROID_CLIENT_ID,
-            web: process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID,
-        }),
-    });
+    // --- Google Sign-In Setup ---
+    useEffect(() => {
+        const clientId = process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID;
+        if (clientId) {
+            GoogleSignin.configure({
+                webClientId: clientId,
+                offlineAccess: true,
+            });
+        } else {
+            console.warn("Google web client ID is not set!");
+        }
+    }, []);
 
-    // Facebook OAuth configuration
-    const [facebookRequest, facebookResponse, facebookPromptAsync] = Facebook.useAuthRequest({
-        clientId: process.env.EXPO_PUBLIC_FACEBOOK_APP_ID || '',
-    });
+    // --- Facebook SDK does not require explicit config for most cases ---
 
     const setError = (error: string | null) =>
         setState(prev => ({ ...prev, error, isLoading: false }));
@@ -119,9 +119,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             setState(prev => ({ ...prev, isLoading: false }));
         }
     };
-    useEffect(() => {
-        loadUserData();
-    }, []);
+    // useEffect(() => {
+    //     loadUserData();
+    // }, []);
     const resetPasswordHandler = useCallback(async (mobile: string, otp: string, password: string) => {
         setState(prev => ({ ...prev, isLoading: true, error: null }));
         try {
@@ -192,7 +192,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         try {
             const response=await requestOTP(mobile);
             setState(prev => ({ ...prev, isLoading: false }));
-            return response.data.otpId
+            return response.otpId
         } catch (error: any) {
             setError(error?.message || "Failed to send OTP");
             throw error;
@@ -268,70 +268,75 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const loginWithGoogle = useCallback(async () => {
         setState(prev => ({ ...prev, isLoading: true, error: null }));
         try {
-            const result = await googlePromptAsync();
-            if (result?.type === 'success' && result.authentication?.idToken) {
-                const response = await fetch(`${process.env.EXPO_PUBLIC_API_URL}/api/auth/google/verify`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ idToken: result.authentication.idToken })
-                });
+            await GoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true });
+            const userInfo = await GoogleSignin.signIn();
+            const idToken = userInfo.data?.idToken;
+            if (!idToken) throw new Error("Google Sign-In failed: No idToken");
 
-                const data = await response.json();
-                if (!response.ok) throw new Error(data.message);
+            const response = await fetch(`${process.env.EXPO_PUBLIC_API_URL}/api/auth/google/verify`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ idToken })
+            });
 
-                await SecureStore.setItemAsync("token", data.data.token);
-                setState(prev => ({
-                    ...prev,
-                    token: data.data.token,
-                    user: data.data.user,
-                    isAuthenticated: true,
-                    isGuest: false,
-                    authMethod: 'google',
-                    isLoading: false,
-                    error: null
-                }));
-            } else {
-                throw new Error('Google authentication cancelled');
-            }
+            const data = await response.json();
+            if (!response.ok) throw new Error(data.message);
+
+            await SecureStore.setItemAsync("token", data.data.token);
+            setState(prev => ({
+                ...prev,
+                token: data.data.token,
+                user: data.data.user,
+                isAuthenticated: true,
+                isGuest: false,
+                authMethod: 'google',
+                isLoading: false,
+                error: null
+            }));
         } catch (error: any) {
-            setError(error?.message || "Google login failed");
+            let msg = error?.message || "Google login failed";
+            if (error.code === statusCodes.SIGN_IN_CANCELLED) msg = "Google sign-in cancelled";
+            setError(msg);
             throw error;
         }
-    }, [googlePromptAsync]);
+    }, []);
 
     const loginWithFacebook = useCallback(async () => {
         setState(prev => ({ ...prev, isLoading: true, error: null }));
         try {
-            const result = await facebookPromptAsync();
-            if (result?.type === 'success' && result.authentication?.accessToken) {
-                const response = await fetch(`${process.env.EXPO_PUBLIC_API_URL}/api/auth/facebook/verify`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ accessToken: result.authentication.accessToken })
-                });
+            // Login with permissions
+            const result = await LoginManager.logInWithPermissions(['public_profile', 'email']);
+            if (result.isCancelled) throw new Error('Facebook authentication cancelled');
 
-                const data = await response.json();
-                if (!response.ok) throw new Error(data.message);
+            const data = await AccessToken.getCurrentAccessToken();
+            if (!data || !data.accessToken) throw new Error('Failed to get Facebook access token');
 
-                await SecureStore.setItemAsync("token", data.data.token);
-                setState(prev => ({
-                    ...prev,
-                    token: data.data.token,
-                    user: data.data.user,
-                    isAuthenticated: true,
-                    isGuest: false,
-                    authMethod: 'facebook',
-                    isLoading: false,
-                    error: null
-                }));
-            } else {
-                throw new Error('Facebook authentication cancelled');
-            }
+            const response = await fetch(`${process.env.EXPO_PUBLIC_API_URL}/api/auth/facebook/verify`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ accessToken: data.accessToken })
+            });
+
+            const respData = await response.json();
+            if (!response.ok) throw new Error(respData.message);
+
+            await SecureStore.setItemAsync("token", respData.data.token);
+            setState(prev => ({
+                ...prev,
+                token: respData.data.token,
+                user: respData.data.user,
+                isAuthenticated: true,
+                isGuest: false,
+                authMethod: 'facebook',
+                isLoading: false,
+                error: null
+            }));
         } catch (error: any) {
-            setError(error?.message || "Facebook login failed");
+            let msg = error?.message || "Facebook login failed";
+            setError(msg);
             throw error;
         }
-    }, [facebookPromptAsync]);
+    }, []);
 
     const sendEmailOTP = useCallback(async (email: string) => {
         setState(prev => ({ ...prev, isLoading: true, error: null }));
@@ -467,10 +472,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         await SecureStore.deleteItemAsync("token");
     };
 
+    console.log("AuthProvider render");
+
     return (
         <AuthContext.Provider value={{
             ...state,
-            setCompany: (c) => setState(prev => ({ ...prev, company: c })),
             logout,
             refreshToken,
             login,
@@ -482,7 +488,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             completeProfile,
             completeRegistration,
             clearError,
-            // New methods
             loginAsGuest,
             loginWithGoogle,
             loginWithFacebook,

@@ -1,6 +1,6 @@
 import React from "react";
 import { NavigationContainer } from '@react-navigation/native';
-import { PaperProvider } from "react-native-paper";
+import { PaperProvider, MD3LightTheme, MD3DarkTheme, Text } from "react-native-paper";
 import { ThemeProvider, useTheme } from "../contexts/ThemeContext";
 import { NetworkProvider } from '../contexts/NetworkContext';
 import { LoadingProvider } from '../contexts/LoadingContext';
@@ -16,20 +16,32 @@ import { navigationRef } from '../services/NavigationService';
 
 const AppContent = () => {
     const { theme, mode } = useTheme();
+
+    // Merge custom theme with Paper's MD3 theme
+    const paperTheme = React.useMemo(() => {
+        const base = mode === "dark" ? MD3DarkTheme : MD3LightTheme;
+        return {
+            ...base,
+            colors: {
+                ...base.colors,
+                ...theme.colors
+            }
+            // You can add more customizations here if needed
+        };
+    }, [theme, mode]);
+
     return (
         <>
             <StatusBar style={mode === "dark" ? 'light' : 'dark'} />
             <NetworkBanner />
-            <PaperProvider theme={{ colors: { ...theme }, animation: { scale: 1.0, defaultAnimationDuration: 0.5 } }}>
-                {/* <NavigationContainer ref={navigationRef}> */}
-                    <AuthProvider>
-                        <CompanyProvider>
-                            <RootNavigator />
-                        </CompanyProvider>
-                    </AuthProvider>
-                {/* </NavigationContainer> */}
+            <PaperProvider theme={paperTheme}>
+                <AuthProvider>
+                    <CompanyProvider>
+                        <RootNavigator />
+                    </CompanyProvider>
+                </AuthProvider>
             </PaperProvider>
-       </>
+        </>
     );
 };
 

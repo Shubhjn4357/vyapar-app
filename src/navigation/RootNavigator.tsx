@@ -1,7 +1,6 @@
 import React from "react";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { useAuth } from "../contexts/AuthContext";
-import { CompanyProvider } from "../contexts/CompanyContext";
 import { RootStackParamList } from "../types/navigation";
 import AuthNavigator from "./AuthNavigator";
 import MainTabNavigator from "./MainTabNavigator";
@@ -15,7 +14,7 @@ import { CustomHeader } from "../components/CustomHeader";
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
 function AuthenticatedNavigator() {
-    const { user, company } = useAuth();
+    const { user, company} = useAuth();
     console.log({user, company})
     // If profile is not complete, show profile completion screen
     if (!user?.isProfileComplete) {
@@ -99,8 +98,9 @@ function AuthenticatedNavigator() {
 }
 
 export default function RootNavigator() {
-    const { isAuthenticated, isLoading } = useAuth();
-
+   
+    const { isAuthenticated, isLoading,error } = useAuth();
+    console.log(isAuthenticated,isLoading,error)
     if (isLoading) {
         return <SplashScreen />;
     }
@@ -113,9 +113,5 @@ export default function RootNavigator() {
         );
     }
 
-    return (
-        <CompanyProvider>
-            <AuthenticatedNavigator />
-        </CompanyProvider>
-    );
+    return (<AuthenticatedNavigator />);
 }

@@ -22,7 +22,7 @@ type CompanyContextType = CompanyState & {
 const CompanyContext = createContext<CompanyContextType | undefined>(undefined);
 
 export const CompanyProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-    const { token, user, setCompany } = useAuth();
+    const { token, user } = useAuth();
     const [state, setState] = useState<CompanyState>({
         companies: [],
         selectedCompany: null,
@@ -49,13 +49,13 @@ export const CompanyProvider: React.FC<{ children: React.ReactNode }> = ({ child
             }));
         } catch (error: any) {
             setError(error?.message || "Failed to load companies");
+            throw error
         }
     }, [token]);
 
     const selectCompany = useCallback((company: Company) => {
         setState(prev => ({ ...prev, selectedCompany: company }));
-        setCompany(company);
-    }, [setCompany]);
+    }, []);
 
     const createNewCompany = useCallback(async (data: { name: string; gstin: string; address?: string }) => {
         if (!token) throw new Error("No token found");
@@ -90,17 +90,14 @@ export const CompanyProvider: React.FC<{ children: React.ReactNode }> = ({ child
                 error: null
             }));
             
-            // Update auth context if this is the selected company
-            if (state.selectedCompany?.id === id) {
-                setCompany(updatedCompany);
-            }
+            
             
             return updatedCompany;
         } catch (error: any) {
             setError(error?.message || "Failed to update company");
             throw error;
         }
-    }, [token, state.selectedCompany?.id, setCompany]);
+    }, [token, state.selectedCompany?.id]);
 
     const refreshSelectedCompany = useCallback(async () => {
         if (!token || !state.selectedCompany) return;
@@ -112,19 +109,23 @@ export const CompanyProvider: React.FC<{ children: React.ReactNode }> = ({ child
                 selectedCompany: refreshedCompany,
                 companies: prev.companies.map(c => c.id === refreshedCompany.id ? refreshedCompany : c)
             }));
-            setCompany(refreshedCompany);
         } catch (error: any) {
             setError(error?.message || "Failed to refresh company data");
         }
-    }, [token, state.selectedCompany, setCompany]);
+    }, [token, state.selectedCompany]);
+
+    console.log("CompanyProvider render");
 
     // Load companies when user is authenticated
-    useEffect(() => {
-        if (user && token) {
-            loadCompanies();
-        }
-    }, [user, token, loadCompanies]);
-
+    // useEffect(() => {
+    //     if (user && token) {
+    //         try {
+    //             loadCompanies();
+    //         } catch (error) {
+    //             console.log("problem in loading Company",error)
+    //         }
+    //     }
+    // }, [user, token]);
     return (
         <CompanyContext.Provider value={{
             ...state,
