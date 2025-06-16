@@ -1,19 +1,26 @@
 export interface Product {
     id: string;
+    companyId: string;
     name: string;
     description?: string;
-    sku: string;
-    category: string;
-    price: number;
-    cost?: number;
-    stock: number;
-    unit: string;
+    sku?: string;
+    barcode?: string;
+    category?: string;
+    unit?: string;
+    sellingPrice: number;
+    costPrice?: number;
+    mrp?: number;
+    stock?: number;
+    minStock?: number;
+    maxStock?: number;
+    taxRate?: number;
     hsnCode?: string;
-    taxRate: number;
-    isActive: boolean;
-    companyId: string;
-    createdAt: string;
-    updatedAt: string;
+    images?: string[];
+    isActive?: boolean;
+    createdBy?: number;
+    updatedBy?: number;
+    createdAt?: string;
+    updatedAt?: string;
 }
 
 export interface ProductFilters {

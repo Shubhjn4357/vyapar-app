@@ -2,27 +2,19 @@ export interface GSTTransaction {
     id: string;
     companyId: string;
     billId?: string;
-    type: 'sale' | 'purchase' | 'credit_note' | 'debit_note';
-    transactionType: 'B2B' | 'B2C' | 'EXPORT' | 'IMPORT';
+    type: 'sale' | 'purchase';
     date: string;
-    invoiceNumber: string;
     partyName?: string;
     partyGstin?: string;
-    partyAddress?: string;
     taxableAmount: number;
     totalTax: number;
     cgst?: number;
     sgst?: number;
     igst?: number;
-    cess?: number;
     total: number;
-    items?: GSTTransactionItem[];
+    items?: any;
     placeOfSupply?: string;
-    stateCode?: string;
     reverseCharge?: boolean;
-    isComposition?: boolean;
-    eInvoiceStatus?: 'pending' | 'generated' | 'cancelled';
-    eWayBillNumber?: string;
     createdAt?: string;
     updatedAt?: string;
 }
@@ -123,3 +115,4 @@ export interface GSTR3BData {
         total: number;
     };
 }
+

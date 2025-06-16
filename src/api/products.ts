@@ -46,31 +46,31 @@ export const productsApi = {
         });
         
         const response = await client.get(`/products?${params.toString()}`);
-        return response as unknown as any;
+        return response.data;
     },
 
     // Create a new product
     createProduct: async (productData: CreateProductData): Promise<ApiResponse<Product>> => {
         const response = await client.post('/products', productData);
-        return response as unknown as any;
+        return response.data;
     },
 
     // Get product by ID
     getProductById: async (id: string): Promise<ApiResponse<Product>> => {
         const response = await client.get(`/products/${id}`);
-        return response as unknown as any;
+        return response.data;
     },
 
     // Update product
     updateProduct: async (id: string, updateData: UpdateProductData): Promise<ApiResponse<Product>> => {
         const response = await client.put(`/products/${id}`, updateData);
-        return response as unknown as any;
+        return response.data;
     },
 
     // Delete product
     deleteProduct: async (id: string): Promise<ApiResponse<{ message: string }>> => {
         const response = await client.delete(`/products/${id}`);
-        return response as unknown as any;
+        return response.data;
     },
 
     // Search products
@@ -86,14 +86,14 @@ export const productsApi = {
         });
         
         const response = await client.get(`/products/search?${params.toString()}`);
-        return response as unknown as any;
+        return response.data;
     },
 
     // Get product categories
     getCategories: async (companyId?: string): Promise<ApiResponse<string[]>> => {
         const params = companyId ? new URLSearchParams({ companyId }) : '';
         const response = await client.get(`/products/categories?${params.toString()}`);
-        return response as unknown as any;
+        return response.data;
     },
 
     // Get low stock products
@@ -109,13 +109,13 @@ export const productsApi = {
         });
         
         const response = await client.get(`/products/low-stock?${params.toString()}`);
-        return response as unknown as any;
+        return response.data;
     },
 
     // Update stock
     updateStock: async (id: string, stockData: StockUpdateData): Promise<ApiResponse<Product>> => {
         const response = await client.post(`/products/${id}/stock`, stockData);
-        return response as unknown as any;
+        return response.data;
     },
 
     // Bulk import products
@@ -125,12 +125,12 @@ export const productsApi = {
                 'Content-Type': 'multipart/form-data',
             },
         });
-        return response as unknown as any;
+        return response.data;
     },
 
     // Export products
     exportProducts: async (exportData: ExportData): Promise<ApiResponse<ExportResponse>> => {
         const response = await client.post('/products/export', exportData);
-        return response as unknown as any;
+        return response.data;
     },
 };

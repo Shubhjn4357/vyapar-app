@@ -3,10 +3,10 @@ export type Company = {
     userId: number;
     name: string;
     gstin: string;
-    address: string;
-    createdBy: number;
-    updatedBy: number;
-    createdAt: Date;
-    updatedAt: Date;
+    address?: string;
+    createdBy?: number;
+    updatedBy?: number;
+    createdAt?: string;
+    updatedAt?: string;
 };
 

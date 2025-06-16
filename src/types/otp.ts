@@ -1,6 +1,7 @@
 export interface OTP {
     id: number;
-    mobile: string;
+    identifier: string;
+    type: string;
     otp: string;
     expiresAt: string;
     createdAt?: string;

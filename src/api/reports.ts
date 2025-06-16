@@ -18,7 +18,7 @@ export const reportsApi = {
         companyId?: string;
     }): Promise<ApiResponse<DashboardMetrics>> => {
         const response = await client.get('/reports/dashboard', { params });
-        return response as unknown as any;
+        return response.data;
     },
 
     // Get sales report
@@ -27,7 +27,7 @@ export const reportsApi = {
         companyId?: string;
     }): Promise<ApiResponse<SalesReport>> => {
         const response = await client.get('/reports/sales', { params });
-        return response as unknown as any;
+        return response.data;
     },
 
     // Get purchase report
@@ -36,25 +36,25 @@ export const reportsApi = {
         companyId?: string;
     }): Promise<ApiResponse<PurchaseReport>> => {
         const response = await client.get('/reports/purchases', { params });
-        return response as unknown as any;
+        return response.data;
     },
 
     // Get tax report
     getTaxReport: async (params?: ReportFilters): Promise<ApiResponse<TaxReport>> => {
         const response = await client.get('/reports/tax', { params });
-        return response as unknown as any;
+        return response.data;
     },
 
     // Get profit & loss report
     getProfitLossReport: async (params?: ReportFilters): Promise<ApiResponse<ProfitLossReport>> => {
         const response = await client.get('/reports/profit-loss', { params });
-        return response as unknown as any;
+        return response.data;
     },
 
     // Get cash flow report
     getCashFlowReport: async (params?: ReportFilters): Promise<ApiResponse<CashFlowReport>> => {
         const response = await client.get('/reports/cash-flow', { params });
-        return response as unknown as any;
+        return response.data;
     },
 
     // Get customer-wise sales report
@@ -71,7 +71,7 @@ export const reportsApi = {
         totalCustomers: number;
     }>> => {
         const response = await client.get('/reports/customer-sales', { params });
-        return response as unknown as any;
+        return response.data;
     },
 
     // Get product-wise sales report
@@ -87,7 +87,7 @@ export const reportsApi = {
         totalProducts: number;
     }>> => {
         const response = await client.get('/reports/product-sales', { params });
-        return response as unknown as any;
+        return response.data;
     },
 
     // Get aging report (outstanding amounts)
@@ -115,7 +115,7 @@ export const reportsApi = {
         };
     }>> => {
         const response = await client.get('/reports/aging', { params });
-        return response as unknown as any;
+        return response.data;
     },
 
     // Get monthly comparison report
@@ -135,7 +135,7 @@ export const reportsApi = {
         totalGrowth: number;
     }>> => {
         const response = await client.get('/reports/monthly-comparison', { params });
-        return response as unknown as any;
+        return response.data;
     },
 
     // Export report to PDF/Excel
@@ -148,7 +148,7 @@ export const reportsApi = {
             format,
             filters: params
         });
-        return response as unknown as any;
+        return response.data;
     },
 
     // Get business insights
@@ -172,6 +172,6 @@ export const reportsApi = {
         }>;
     }>> => {
         const response = await client.get('/reports/insights', { params });
-        return response as unknown as any;
+        return response.data;
     }
 };

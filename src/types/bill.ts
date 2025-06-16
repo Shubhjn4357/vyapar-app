@@ -11,10 +11,12 @@ export interface BillItem {
     hsnCode?: string;
     total: number;
 }
+
 export enum BillType{
     SALES = 'SALES',
     PURCHASE='PURCHASE'
 }
+
 export interface Bill {
     id: string;
     billNumber: string;
@@ -25,7 +27,7 @@ export interface Bill {
     customerPhone?: string;
     customerEmail?: string;
     amount: number;
-    taxAmount: number;
+    taxAmount?: number;
     totalAmount: number;
     date: string;
     dueDate: string;

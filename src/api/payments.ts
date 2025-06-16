@@ -65,31 +65,31 @@ export const paymentsApi = {
         });
         
         const response = await client.get(`/payments?${params.toString()}`);
-        return response as unknown as ApiResponse<PaymentsListResponse>;
+        return response.data;
     },
 
     // Create a new payment
     createPayment: async (paymentData: CreatePaymentData): Promise<ApiResponse<Payment>> => {
         const response = await client.post('/payments', paymentData);
-        return response as unknown as ApiResponse<Payment>;
+        return response.data;
     },
 
     // Get payment by ID
     getPaymentById: async (id: string): Promise<ApiResponse<Payment>> => {
         const response = await client.get(`/payments/${id}`);
-        return response as unknown as ApiResponse<Payment>;
+        return response.data;
     },
 
     // Update payment
     updatePayment: async (id: string, updateData: UpdatePaymentData): Promise<ApiResponse<Payment>> => {
         const response = await client.put(`/payments/${id}`, updateData);
-        return response as unknown as ApiResponse<Payment>;
+        return response.data;
     },
 
     // Delete payment
     deletePayment: async (id: string): Promise<ApiResponse<{ message: string }>> => {
         const response = await client.delete(`/payments/${id}`);
-        return response as unknown as ApiResponse<{ message: string }>;
+        return response.data;
     },
 
     // Get payment summary
@@ -106,7 +106,7 @@ export const paymentsApi = {
         });
         
         const response = await client.get(`/payments/summary?${params.toString()}`);
-        return response as unknown as ApiResponse<PaymentSummary>;
+        return response.data;
     },
 
     // Get payment methods summary
@@ -123,7 +123,7 @@ export const paymentsApi = {
         });
         
         const response = await client.get(`/payments/methods?${params.toString()}`);
-        return response as unknown as ApiResponse<PaymentMethodSummary[]>;
+        return response.data;
     },
 
     // Get recent payments
@@ -139,6 +139,6 @@ export const paymentsApi = {
         });
         
         const response = await client.get(`/payments/recent?${params.toString()}`);
-        return response as unknown as ApiResponse<Payment[]>;
+        return response.data;
     },
 };

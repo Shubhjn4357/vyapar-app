@@ -1,54 +1,11 @@
 import { client } from './client';
 import { ApiError } from './errors';
 import { User } from '../types/user';
-
-interface AuthResponse {
-    status: string;
-    data: {
-        token: string;
-        user: User;
-    };
-    message: string;
-}
-
-interface OTPResponse {
-    status: string;
-    data: {
-        otpId: string;
-        expiresAt: string;
-    };
-    message: string;
-}
-
-interface VerifyOTPResponse {
-    status: string;
-    data: {
-        token: string;
-        user: User;
-        resetToken?: string;
-    };
-    message: string;
-}
-
-interface RefreshTokenResponse {
-    token: string;
-    expiresAt: string;
-}
-
-interface SocialAuthResponse extends AuthResponse {
-    isNewUser: boolean;
-    socialProfile?: {
-        id: string;
-        email?: string;
-        name?: string;
-        picture?: string;
-        phone?: string;
-    };
-}
+import { ApiResponse } from '../types/api';
 
 export const loginApi = async (mobile: string, password: string): Promise<{token: string, user: User}> => {
     try {
-        const { data } = await client.post<AuthResponse>('/auth/login', {
+        const { data } = await client.post<ApiResponse<{ token: string; user: User }>>('/auth/login', {
             mobile,
             password
         });
@@ -60,13 +17,13 @@ export const loginApi = async (mobile: string, password: string): Promise<{token
 };
 export const resetPassword = async (mobile: string, token: string, password: string, otpId: string): Promise<{ status: string; message: string }> => {
     try {
-        const { data } = await client.post('/auth/reset-password', {
+        const { data } = await client.post<ApiResponse<{ status: string; message: string }>>('/auth/reset-password', {
             mobile,
             token,
             password,
             otpId
         });
-        return data;
+        return data.data;
     } catch (error) {
         throw new ApiError('Reset password failed', error);
     }
@@ -78,7 +35,7 @@ export const registerApi = async (data: {
     name?: string;
 }): Promise<{token: string, user: User}> => {
     try {
-        const { data: response } = await client.post<AuthResponse>('/auth/register', data);
+        const { data: response } = await client.post<ApiResponse<{ token: string; user: User }>>('/auth/register', data);
         return response.data;
     } catch (error) {
         console.log(error)
@@ -87,22 +44,22 @@ export const registerApi = async (data: {
 };
 
 export const logoutApi = async (token: string): Promise<void> => {
-    
+    // Implement if needed
 };
 
-export const googleLoginApi = async (googleId: string, email: string, name?: string, phone?: string): Promise<AuthResponse> => {
+export const googleLoginApi = async (googleId: string, email: string, name?: string, phone?: string): Promise<{token: string, user: User}> => {
     try {
-        const { data } = await client.post<AuthResponse>('/auth/google', { googleId, email, name, phone });
-        return data;
+        const { data } = await client.post<ApiResponse<{ token: string; user: User }>>('/auth/google', { googleId, email, name, phone });
+        return data.data;
     } catch (error) {
         throw new ApiError('Google login failed', error);
     }
 };
 
-export const facebookLogin = async (accessToken: string): Promise<SocialAuthResponse> => {
+export const facebookLogin = async (accessToken: string): Promise<{token: string, user: User, isNewUser?: boolean, socialProfile?: any}> => {
     try {
-        const { data } = await client.post<SocialAuthResponse>('/auth/facebook', { accessToken });
-        return data;
+        const { data } = await client.post<ApiResponse<{ token: string; user: User; isNewUser?: boolean; socialProfile?: any }>>('/auth/facebook', { accessToken });
+        return data.data;
     } catch (error) {
         throw new ApiError('Facebook login failed', error);
     }
@@ -110,45 +67,44 @@ export const facebookLogin = async (accessToken: string): Promise<SocialAuthResp
 
 export const fetchProfileApi = async (token:string): Promise<User> => {
     try {
-        const { data } = await client.get<User>('/user/me', {
+        const { data } = await client.get<ApiResponse<User>>('/user/me', {
             headers: {
                 Authorization: `Bearer ${token}`
             }
         });
-        
-        return data;
+        return data.data;
     } catch (error) {
         console.log({error})
         throw new ApiError('Failed to fetch profile', error);
     }
 };
 
-export const requestOTP = async (mobile: string): Promise<OTPResponse> => {
+export const requestOTP = async (mobile: string): Promise<{ otpId: string; expiresAt: string }> => {
     try {
-        const { data } = await client.post<OTPResponse>('/auth/otp/request', { mobile });
-        return data;
+        const { data } = await client.post<ApiResponse<{ otpId: string; expiresAt: string }>>('/auth/otp/request', { mobile });
+        return data.data;
     } catch (error) {
         throw new ApiError('Failed to send OTP', error);
     }
 };
 
-export const verifyOTP = async (mobile: string, otp: string, otpId: string): Promise<VerifyOTPResponse> => {
+export const verifyOTP = async (mobile: string, otp: string, otpId: string): Promise<{ token: string; user: User; resetToken?: string }> => {
     try {
-        const { data } = await client.post<VerifyOTPResponse>('/auth/otp/verify', {
+        const { data } = await client.post<ApiResponse<{ token: string; user: User; resetToken?: string }>>('/auth/otp/verify', {
             mobile,
             otp,
             otpId
         });
-        return data;
+        return data.data;
     } catch (error) {
         throw new ApiError('OTP verification failed', error);
     }
 };
 
-export const refreshToken = async (token: string): Promise<RefreshTokenResponse> => {
+export const refreshToken = async (token: string): Promise<{ token: string; expiresAt: string }> => {
     try {
-        const { data } = await client.post<RefreshTokenResponse>('/auth/refresh', { token });
-        return data;
+        const { data } = await client.post<ApiResponse<{ token: string; expiresAt: string }>>('/auth/refresh', { token });
+        return data.data;
     } catch (error) {
         throw new ApiError('Failed to refresh token', error);
     }
@@ -159,7 +115,7 @@ export const completeProfileApi = async (token: string, profileData: {
     email?: string;
 }): Promise<User> => {
     try {
-        const { data } = await client.put<{status: string, data: User}>('/user/me/profile', profileData, {
+        const { data } = await client.put<ApiResponse<User>>('/user/me/profile', profileData, {
             headers: {
                 Authorization: `Bearer ${token}`
             }
@@ -169,5 +125,4 @@ export const completeProfileApi = async (token: string, profileData: {
         throw new ApiError('Failed to complete profile', error);
     }
 };
-
 
