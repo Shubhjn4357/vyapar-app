@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ScrollView, RefreshControl, View, StyleSheet } from 'react-native';
+import { ScrollView, RefreshControl, View, StyleSheet, TouchableOpacity } from 'react-native';
 import { Card, Text, FAB, useTheme } from 'react-native-paper';
 import { useDashboardMetrics } from '../../hooks/useReports';
 import { useBills } from '../../hooks/useBills';
@@ -10,8 +10,12 @@ import { SalesChart } from '../../components/dashboard/SalesChart';
 import { EnhancedDashboard } from '../../components/dashboard/EnhancedDashboard';
 import { billsApi } from '../../api/bills';
 import { Bill } from '../../types/bill';
+import type { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { MainTabParamList } from '@/src/types/navigation';
 
-export const DashboardScreen = ({ navigation }: { navigation: any }) => {
+type Props = NativeStackScreenProps<MainTabParamList, 'Dashboard'>
+
+export const DashboardScreen = ({ navigation }: Props) => {
   const theme = useTheme();
   const { metrics, loading: metricsLoading, fetchMetrics } = useDashboardMetrics();
   const { bills, loading: billsLoading, fetchBills } = useBills();
@@ -117,24 +121,35 @@ export const DashboardScreen = ({ navigation }: { navigation: any }) => {
             <Text variant="titleMedium" style={styles.sectionTitle}>Quick Actions</Text>
             <View style={styles.quickActionsGrid}>
               <Card style={styles.quickActionItem}>
-                <Card.Content style={styles.quickActionContent}>
-                  <Text variant="bodyMedium">Create Bill</Text>
-                </Card.Content>
+                <TouchableOpacity onPress={() => navigation.navigate('Bills', { screen: 'CreateBill' })}>
+                  <Card.Content style={styles.quickActionContent}>
+                    <Text variant="bodyMedium">Create Bill</Text>
+                  </Card.Content>
+                  </TouchableOpacity>
               </Card>
               <Card style={styles.quickActionItem}>
+                <TouchableOpacity onPress={() => {}}>
+
                 <Card.Content style={styles.quickActionContent}>
                   <Text variant="bodyMedium">Add Customer</Text>
                 </Card.Content>
+                </TouchableOpacity>
               </Card>
               <Card style={styles.quickActionItem}>
+                <TouchableOpacity onPress={() => navigation.navigate('Reports',{screen:'ReportDashboard'})}>
+
                 <Card.Content style={styles.quickActionContent}>
                   <Text variant="bodyMedium">View Reports</Text>
                 </Card.Content>
+                </TouchableOpacity>
               </Card>
               <Card style={styles.quickActionItem}>
+                <TouchableOpacity onPress={() => navigation.navigate('GST', { screen: 'GSTDashboard' })}>
+
                 <Card.Content style={styles.quickActionContent}>
                   <Text variant="bodyMedium">GST Returns</Text>
                 </Card.Content>
+                </TouchableOpacity>
               </Card>
             </View>
           </Card.Content>
@@ -189,8 +204,7 @@ export const DashboardScreen = ({ navigation }: { navigation: any }) => {
         icon="plus"
         style={styles.fab}
         onPress={() => {
-          // Navigate to create bill screen
-          console.log('Navigate to create bill');
+          navigation.navigate('Bills',{screen:'CreateBill'})
         }}
       />
     </View>

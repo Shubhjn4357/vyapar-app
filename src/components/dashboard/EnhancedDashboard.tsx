@@ -11,7 +11,7 @@ interface EnhancedDashboardProps {
 }
 
 export const EnhancedDashboard: React.FC<EnhancedDashboardProps> = ({ navigation }) => {
-    const { theme: colors } = useTheme();
+    const { theme: colors} = useTheme();
     const { summary: paymentSummary } = usePaymentSummary();
     const { recentPayments } = useRecentPayments({ limit: 5 });
     const { lowStockProducts } = useLowStockProducts({ threshold: 10 });
@@ -24,7 +24,7 @@ export const EnhancedDashboard: React.FC<EnhancedDashboardProps> = ({ navigation
         sectionTitle: {
             fontSize: 18,
             fontWeight: 'bold',
-            color: colors.text,
+            color: colors.colors.text,
             marginBottom: 12,
             marginTop: 20,
         },
@@ -35,13 +35,13 @@ export const EnhancedDashboard: React.FC<EnhancedDashboardProps> = ({ navigation
             marginBottom: 20,
         },
         quickActionCard: {
-            backgroundColor: colors.surface,
+            backgroundColor: colors.colors.surface,
             borderRadius: 12,
             padding: 16,
             alignItems: 'center',
             minWidth: '45%',
             borderWidth: 1,
-            borderColor: colors.border,
+            borderColor: colors.colors.border,
         },
         quickActionIcon: {
             marginBottom: 8,
@@ -49,7 +49,7 @@ export const EnhancedDashboard: React.FC<EnhancedDashboardProps> = ({ navigation
         quickActionText: {
             fontSize: 12,
             fontWeight: '600',
-            color: colors.text,
+            color: colors.colors.text,
             textAlign: 'center',
         },
         summaryContainer: {
@@ -59,49 +59,49 @@ export const EnhancedDashboard: React.FC<EnhancedDashboardProps> = ({ navigation
         },
         summaryCard: {
             flex: 1,
-            backgroundColor: colors.surface,
+            backgroundColor: colors.colors.surface,
             borderRadius: 12,
             padding: 16,
             borderWidth: 1,
-            borderColor: colors.border,
+            borderColor: colors.colors.border,
         },
         summaryValue: {
             fontSize: 20,
             fontWeight: 'bold',
-            color: colors.primary,
+            color: colors.colors.primary,
             marginBottom: 4,
         },
         summaryLabel: {
             fontSize: 12,
-            color: colors.textSecondary,
+            color: colors.colors.textSecondary,
         },
         alertCard: {
-            backgroundColor: colors.surface,
+            backgroundColor: colors.colors.surface,
             borderRadius: 12,
             padding: 16,
             marginBottom: 12,
             borderLeftWidth: 4,
-            borderLeftColor: colors.error,
+            borderLeftColor: colors.colors.error,
             borderWidth: 1,
-            borderColor: colors.border,
+            borderColor: colors.colors.border,
         },
         alertTitle: {
             fontSize: 14,
             fontWeight: '600',
-            color: colors.error,
+            color: colors.colors.error,
             marginBottom: 4,
         },
         alertText: {
             fontSize: 12,
-            color: colors.textSecondary,
+            color: colors.colors.textSecondary,
         },
         recentItem: {
-            backgroundColor: colors.surface,
+            backgroundColor: colors.colors.surface,
             borderRadius: 8,
             padding: 12,
             marginBottom: 8,
             borderWidth: 1,
-            borderColor: colors.border,
+            borderColor: colors.colors.border,
         },
         recentItemHeader: {
             flexDirection: 'row',
@@ -112,25 +112,25 @@ export const EnhancedDashboard: React.FC<EnhancedDashboardProps> = ({ navigation
         recentItemAmount: {
             fontSize: 14,
             fontWeight: '600',
-            color: colors.primary,
+            color: colors.colors.primary,
         },
         recentItemDate: {
             fontSize: 12,
-            color: colors.textSecondary,
+            color: colors.colors.textSecondary,
         },
         recentItemMethod: {
             fontSize: 12,
-            color: colors.text,
+            color: colors.colors.text,
         },
         viewAllButton: {
-            backgroundColor: colors.primary,
+            backgroundColor: colors.colors.primary,
             borderRadius: 8,
             padding: 12,
             alignItems: 'center',
             marginTop: 8,
         },
         viewAllButtonText: {
-            color: colors.surface,
+            color: colors.colors.surface,
             fontWeight: '600',
         },
     });
@@ -158,7 +158,7 @@ export const EnhancedDashboard: React.FC<EnhancedDashboardProps> = ({ navigation
                     style={styles.quickActionCard}
                     onPress={() => navigation.navigate('Products', { screen: 'AddProduct' })}
                 >
-                    <Ionicons name="cube" size={24} color={colors.primary} style={styles.quickActionIcon} />
+                    <Ionicons name="cube" size={24} color={colors.colors.primary} style={styles.quickActionIcon} />
                     <Text style={styles.quickActionText}>Add Product</Text>
                 </TouchableOpacity>
 
@@ -166,7 +166,7 @@ export const EnhancedDashboard: React.FC<EnhancedDashboardProps> = ({ navigation
                     style={styles.quickActionCard}
                     onPress={() => navigation.navigate('Payments', { screen: 'AddPayment' })}
                 >
-                    <Ionicons name="card" size={24} color={colors.primary} style={styles.quickActionIcon} />
+                    <Ionicons name="card" size={24} color={colors.colors.primary} style={styles.quickActionIcon} />
                     <Text style={styles.quickActionText}>Record Payment</Text>
                 </TouchableOpacity>
 
@@ -174,7 +174,7 @@ export const EnhancedDashboard: React.FC<EnhancedDashboardProps> = ({ navigation
                     style={styles.quickActionCard}
                     onPress={() => navigation.navigate('Bills', { screen: 'CreateBill' })}
                 >
-                    <Ionicons name="receipt" size={24} color={colors.primary} style={styles.quickActionIcon} />
+                    <Ionicons name="receipt" size={24} color={colors.colors.primary} style={styles.quickActionIcon} />
                     <Text style={styles.quickActionText}>Create Bill</Text>
                 </TouchableOpacity>
 
@@ -182,7 +182,7 @@ export const EnhancedDashboard: React.FC<EnhancedDashboardProps> = ({ navigation
                     style={styles.quickActionCard}
                     onPress={() => navigation.navigate('Reports')}
                 >
-                    <Ionicons name="analytics" size={24} color={colors.primary} style={styles.quickActionIcon} />
+                    <Ionicons name="analytics" size={24} color={colors.colors.primary} style={styles.quickActionIcon} />
                     <Text style={styles.quickActionText}>View Reports</Text>
                 </TouchableOpacity>
             </View>
@@ -241,7 +241,7 @@ export const EnhancedDashboard: React.FC<EnhancedDashboardProps> = ({ navigation
                                 </Text>
                             </View>
                             <Text style={styles.recentItemMethod}>
-                                via {payment.method}
+                                via {payment.mode}
                             </Text>
                         </View>
                     ))}

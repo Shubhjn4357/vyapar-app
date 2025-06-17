@@ -44,24 +44,24 @@ export const PaymentsScreen: React.FC<PaymentsScreenProps> = ({ navigation }) =>
     const styles = StyleSheet.create({
         container: {
             flex: 1,
-            backgroundColor: colors.background,
+            backgroundColor: colors.colors.background,
         },
         header: {
             flexDirection: 'row',
             justifyContent: 'space-between',
             alignItems: 'center',
             padding: 16,
-            backgroundColor: colors.surface,
+            backgroundColor: colors.colors.surface,
             borderBottomWidth: 1,
-            borderBottomColor: colors.border,
+            borderBottomColor: colors.colors.border,
         },
         title: {
             fontSize: 24,
             fontWeight: 'bold',
-            color: colors.text,
+            color: colors.colors.text,
         },
         addButton: {
-            backgroundColor: colors.primary,
+            backgroundColor: colors.colors.primary,
             paddingHorizontal: 16,
             paddingVertical: 8,
             borderRadius: 8,
@@ -69,7 +69,7 @@ export const PaymentsScreen: React.FC<PaymentsScreenProps> = ({ navigation }) =>
             alignItems: 'center',
         },
         addButtonText: {
-            color: colors.surface,
+            color: colors.colors.surface,
             fontWeight: '600',
             marginLeft: 4,
         },
@@ -80,21 +80,21 @@ export const PaymentsScreen: React.FC<PaymentsScreenProps> = ({ navigation }) =>
         },
         searchInput: {
             flex: 1,
-            backgroundColor: colors.surface,
+            backgroundColor: colors.colors.surface,
             borderRadius: 8,
             paddingHorizontal: 12,
             paddingVertical: 8,
             borderWidth: 1,
-            borderColor: colors.border,
-            color: colors.text,
+            borderColor: colors.colors.border,
+            color: colors.colors.text,
         },
         filterButton: {
-            backgroundColor: colors.surface,
+            backgroundColor: colors.colors.surface,
             paddingHorizontal: 12,
             paddingVertical: 8,
             borderRadius: 8,
             borderWidth: 1,
-            borderColor: colors.border,
+            borderColor: colors.colors.border,
             justifyContent: 'center',
         },
         summaryContainer: {
@@ -104,32 +104,32 @@ export const PaymentsScreen: React.FC<PaymentsScreenProps> = ({ navigation }) =>
         },
         summaryCard: {
             flex: 1,
-            backgroundColor: colors.surface,
+            backgroundColor: colors.colors.surface,
             padding: 12,
             borderRadius: 8,
             alignItems: 'center',
             borderWidth: 1,
-            borderColor: colors.border,
+            borderColor: colors.colors.border,
         },
         summaryNumber: {
             fontSize: 16,
             fontWeight: 'bold',
-            color: colors.primary,
+            color: colors.colors.primary,
         },
         summaryLabel: {
             fontSize: 10,
-            color: colors.textSecondary,
+            color: colors.colors.textSecondary,
             marginTop: 4,
             textAlign: 'center',
         },
         paymentCard: {
-            backgroundColor: colors.surface,
+            backgroundColor: colors.colors.surface,
             marginHorizontal: 16,
             marginVertical: 4,
             padding: 16,
             borderRadius: 8,
             borderWidth: 1,
-            borderColor: colors.border,
+            borderColor: colors.colors.border,
         },
         paymentHeader: {
             flexDirection: 'row',
@@ -140,7 +140,7 @@ export const PaymentsScreen: React.FC<PaymentsScreenProps> = ({ navigation }) =>
         paymentAmount: {
             fontSize: 18,
             fontWeight: 'bold',
-            color: colors.primary,
+            color: colors.colors.primary,
         },
         paymentStatus: {
             fontSize: 12,
@@ -167,16 +167,16 @@ export const PaymentsScreen: React.FC<PaymentsScreenProps> = ({ navigation }) =>
         },
         paymentMethod: {
             fontSize: 14,
-            color: colors.text,
+            color: colors.colors.text,
             fontWeight: '500',
         },
         paymentDate: {
             fontSize: 12,
-            color: colors.textSecondary,
+            color: colors.colors.textSecondary,
         },
         paymentReference: {
             fontSize: 12,
-            color: colors.textSecondary,
+            color: colors.colors.textSecondary,
             fontStyle: 'italic',
         },
         paymentActions: {
@@ -192,20 +192,20 @@ export const PaymentsScreen: React.FC<PaymentsScreenProps> = ({ navigation }) =>
             borderWidth: 1,
         },
         editButton: {
-            borderColor: colors.primary,
+            borderColor: colors.colors.primary,
         },
         deleteButton: {
-            borderColor: colors.error,
+            borderColor: colors.colors.error,
         },
         actionButtonText: {
             fontSize: 12,
             fontWeight: '600',
         },
         editButtonText: {
-            color: colors.primary,
+            color: colors.colors.primary,
         },
         deleteButtonText: {
-            color: colors.error,
+            color: colors.colors.error,
         },
         emptyContainer: {
             flex: 1,
@@ -215,18 +215,18 @@ export const PaymentsScreen: React.FC<PaymentsScreenProps> = ({ navigation }) =>
         },
         emptyText: {
             fontSize: 16,
-            color: colors.textSecondary,
+            color: colors.colors.textSecondary,
             textAlign: 'center',
             marginTop: 16,
         },
         errorContainer: {
             padding: 16,
-            backgroundColor: colors.error + '20',
+            backgroundColor: colors.colors.error + '20',
             margin: 16,
             borderRadius: 8,
         },
         errorText: {
-            color: colors.error,
+            color: colors.colors.error,
             textAlign: 'center',
         },
     });
@@ -295,7 +295,7 @@ export const PaymentsScreen: React.FC<PaymentsScreenProps> = ({ navigation }) =>
 
             <View style={styles.paymentDetails}>
                 <Text style={styles.paymentMethod}>
-                    Method: {item.method}
+                    Method: {item.mode}
                 </Text>
                 <Text style={styles.paymentDate}>
                     Date: {formatDate(item.date)}
@@ -340,7 +340,7 @@ export const PaymentsScreen: React.FC<PaymentsScreenProps> = ({ navigation }) =>
                     style={styles.addButton}
                     onPress={() => navigation.navigate('AddPayment')}
                 >
-                    <Ionicons name="add" size={20} color={colors.surface} />
+                    <Ionicons name="add" size={20} color={colors.colors.surface} />
                     <Text style={styles.addButtonText}>Add Payment</Text>
                 </TouchableOpacity>
             </View>
@@ -349,12 +349,12 @@ export const PaymentsScreen: React.FC<PaymentsScreenProps> = ({ navigation }) =>
                 <TextInput
                     style={styles.searchInput}
                     placeholder="Search payments..."
-                    placeholderTextColor={colors.textSecondary}
+                    placeholderTextColor={colors.colors.textSecondary}
                     value={searchQuery}
                     onChangeText={setSearchQuery}
                 />
                 <TouchableOpacity style={styles.filterButton}>
-                    <Ionicons name="filter" size={20} color={colors.text} />
+                    <Ionicons name="filter" size={20} color={colors.colors.text} />
                 </TouchableOpacity>
             </View>
 
@@ -391,13 +391,13 @@ export const PaymentsScreen: React.FC<PaymentsScreenProps> = ({ navigation }) =>
                     <RefreshControl
                         refreshing={loading}
                         onRefresh={refresh}
-                        colors={[colors.primary]}
+                        colors={[colors.colors.primary]}
                     />
                 }
                 ListEmptyComponent={
                     !loading ? (
                         <View style={styles.emptyContainer}>
-                            <Ionicons name="card-outline" size={64} color={colors.textSecondary} />
+                            <Ionicons name="card-outline" size={64} color={colors.colors.textSecondary} />
                             <Text style={styles.emptyText}>
                                 No payments found.{'\n'}Add your first payment to get started.
                             </Text>

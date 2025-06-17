@@ -300,7 +300,6 @@ export default function GSTDashboardScreen({ navigation }: any) {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#f5f5f5',
     },
     header: {
         padding: 20,
