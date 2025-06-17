@@ -62,7 +62,7 @@ client.interceptors.response.use(
         };
     },
     (error) => {
-        // console.log('client', error)
+        console.log('client', error)
         if (error.response?.status === 401) {
             throw new AuthError('Authentication failed');
         }

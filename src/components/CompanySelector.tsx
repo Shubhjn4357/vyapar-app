@@ -8,7 +8,7 @@ const CompanySelector = () => {
     const handleMenu = () => setVisible(!visible);
     return (
             <Menu
-                style={{ top: 50, right: 20 }}
+                style={{ position:'absolute',top: 50, right: 20, zIndex:10 }}
                 visible={visible}
                 onDismiss={handleMenu}
                 anchor={<Button mode="text" onPress={handleMenu}>{selectedCompany?.name}</Button>}>

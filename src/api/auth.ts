@@ -67,12 +67,12 @@ export const facebookLogin = async (accessToken: string): Promise<{token: string
 
 export const fetchProfileApi = async (token:string): Promise<User> => {
     try {
-        const { data } = await client.get<ApiResponse<User>>('/user/me', {
+        const { data } = await client.get<User>('/user/me', {
             headers: {
                 Authorization: `Bearer ${token}`
             }
         });
-        return data.data;
+        return data;
     } catch (error) {
         console.log({error})
         throw new ApiError('Failed to fetch profile', error);
@@ -115,12 +115,13 @@ export const completeProfileApi = async (token: string, profileData: {
     email?: string;
 }): Promise<User> => {
     try {
-        const { data } = await client.put<ApiResponse<User>>('/user/me/profile', profileData, {
+        const { data } = await client.put<User>('/user/me/profile', profileData, {
             headers: {
                 Authorization: `Bearer ${token}`
             }
         });
-        return data.data;
+        
+        return data;
     } catch (error) {
         throw new ApiError('Failed to complete profile', error);
     }

@@ -1,6 +1,5 @@
 import React from "react";
-import { NavigationContainer } from '@react-navigation/native';
-import { PaperProvider, MD3LightTheme, MD3DarkTheme, Text } from "react-native-paper";
+import { PaperProvider, MD3LightTheme, MD3DarkTheme } from "react-native-paper";
 import { ThemeProvider, useTheme } from "../contexts/ThemeContext";
 import { NetworkProvider } from '../contexts/NetworkContext';
 import { LoadingProvider } from '../contexts/LoadingContext';
@@ -12,7 +11,6 @@ import { NetworkBanner } from '../components/NetworkBanner';
 import { AuthProvider } from "../contexts/AuthContext";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { StatusBar } from 'expo-status-bar';
-import { navigationRef } from '../services/NavigationService';
 
 const AppContent = () => {
     const { theme, mode } = useTheme();

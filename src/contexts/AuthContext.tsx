@@ -1,12 +1,13 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
 import { fetchProfileApi, loginApi, registerApi, requestOTP, resetPassword, verifyOTP, completeProfileApi } from "../api/auth";
 import * as SecureStore from "expo-secure-store";
-import { GoogleSignin, statusCodes, User as GoogleUser } from '@react-native-google-signin/google-signin';
-import { AccessToken, LoginManager, Profile as FBProfile } from 'react-native-fbsdk-next';
+// import { GoogleSignin, statusCodes, User as GoogleUser } from '@react-native-google-signin/google-signin';
+// import { AccessToken, LoginManager, Profile as FBProfile } from 'react-native-fbsdk-next';
 import { User } from "../types/user";
 import { Company } from "../types/company";
 import { Platform } from "react-native";
 import * as Device from 'expo-device';
+import { loginAsGuestApi } from "../api/guest";
 
 type AuthState = {
     user: User | null;
@@ -31,15 +32,15 @@ type AuthContextType = AuthState & {
     completeProfile: (profileData: { name?: string; email?: string }) => Promise<void>;
     completeRegistration: (token: string, user: User) => Promise<void>;
     clearError: () => void;
-    // New authentication methods
     loginAsGuest: () => Promise<void>;
-    loginWithGoogle: () => Promise<void>;
-    loginWithFacebook: () => Promise<void>;
+    // loginWithGoogle: () => Promise<void>;
+    // loginWithFacebook: () => Promise<void>;
     sendEmailOTP: (email: string) => Promise<void>;
     sendSMSOTP: (mobile: string) => Promise<void>;
     verifyEmailOTP: (email: string, otp: string) => Promise<void>;
     verifyMobileOTP: (mobile: string, otp: string) => Promise<{ token: string; user: User; isNewUser: boolean }>;
     convertGuestToUser: (data: { name: string; email?: string; mobile?: string; password?: string }) => Promise<void>;
+    selectCompany:(company:Company)=>void;
 };
 
 export const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -57,19 +58,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     });
 
     // --- Google Sign-In Setup ---
-    useEffect(() => {
-        const clientId = process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID;
-        if (clientId) {
-            GoogleSignin.configure({
-                webClientId: clientId,
-                offlineAccess: true,
-            });
-        } else {
-            console.warn("Google web client ID is not set!");
-        }
-    }, []);
-
-    // --- Facebook SDK does not require explicit config for most cases ---
+    // useEffect(() => {
+    //     const clientId = process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID;
+    //     console.log('geting clientid',clientId)
+    //     if (clientId) {
+    //         console.log('initialize')
+    //         GoogleSignin.configure({
+    //             webClientId: clientId,
+    //             offlineAccess: true,
+    //         });
+    //     } else {
+    //         console.warn("Google web client ID is not set!");
+    //     }
+    // }, []);
 
     const setError = (error: string | null) =>
         setState(prev => ({ ...prev, error, isLoading: false }));
@@ -119,9 +120,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             setState(prev => ({ ...prev, isLoading: false }));
         }
     };
-    // useEffect(() => {
-    //     loadUserData();
-    // }, []);
+    useEffect(() => {
+        loadUserData();
+    }, []);
     const resetPasswordHandler = useCallback(async (mobile: string, otp: string, password: string) => {
         setState(prev => ({ ...prev, isLoading: true, error: null }));
         try {
@@ -239,20 +240,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 model: Device.modelName || 'Unknown'
             };
 
-            const response = await fetch(`${process.env.EXPO_PUBLIC_API_URL}/api/auth/guest`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ deviceId, deviceInfo })
-            });
+            const guestUser = await loginAsGuestApi({ deviceId, deviceInfo })
+            
 
-            const data = await response.json();
-            if (!response.ok) throw new Error(data.message);
-
-            await SecureStore.setItemAsync("token", data.data.token);
+            await SecureStore.setItemAsync("token", guestUser.token);
             setState(prev => ({
                 ...prev,
-                token: data.data.token,
-                user: data.data.user,
+                token: guestUser.token,
+                user: guestUser.user,
                 isAuthenticated: true,
                 isGuest: true,
                 authMethod: 'guest',
@@ -265,78 +260,78 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }
     }, []);
 
-    const loginWithGoogle = useCallback(async () => {
-        setState(prev => ({ ...prev, isLoading: true, error: null }));
-        try {
-            await GoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true });
-            const userInfo = await GoogleSignin.signIn();
-            const idToken = userInfo.data?.idToken;
-            if (!idToken) throw new Error("Google Sign-In failed: No idToken");
+    // const loginWithGoogle = useCallback(async () => {
+    //     setState(prev => ({ ...prev, isLoading: true, error: null }));
+    //     try {
+    //         await GoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true });
+    //         const userInfo = await GoogleSignin.signIn();
+    //         const idToken = userInfo.data?.idToken;
+    //         if (!idToken) throw new Error("Google Sign-In failed: No idToken");
 
-            const response = await fetch(`${process.env.EXPO_PUBLIC_API_URL}/api/auth/google/verify`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ idToken })
-            });
+    //         const response = await fetch(`${process.env.EXPO_PUBLIC_API_URL}/api/auth/google/verify`, {
+    //             method: 'POST',
+    //             headers: { 'Content-Type': 'application/json' },
+    //             body: JSON.stringify({ idToken })
+    //         });
 
-            const data = await response.json();
-            if (!response.ok) throw new Error(data.message);
+    //         const data = await response.json();
+    //         if (!response.ok) throw new Error(data.message);
 
-            await SecureStore.setItemAsync("token", data.data.token);
-            setState(prev => ({
-                ...prev,
-                token: data.data.token,
-                user: data.data.user,
-                isAuthenticated: true,
-                isGuest: false,
-                authMethod: 'google',
-                isLoading: false,
-                error: null
-            }));
-        } catch (error: any) {
-            let msg = error?.message || "Google login failed";
-            if (error.code === statusCodes.SIGN_IN_CANCELLED) msg = "Google sign-in cancelled";
-            setError(msg);
-            throw error;
-        }
-    }, []);
+    //         await SecureStore.setItemAsync("token", data.data.token);
+    //         setState(prev => ({
+    //             ...prev,
+    //             token: data.data.token,
+    //             user: data.data.user,
+    //             isAuthenticated: true,
+    //             isGuest: false,
+    //             authMethod: 'google',
+    //             isLoading: false,
+    //             error: null
+    //         }));
+    //     } catch (error: any) {
+    //         let msg = error?.message || "Google login failed";
+    //         if (error.code === statusCodes.SIGN_IN_CANCELLED) msg = "Google sign-in cancelled";
+    //         setError(msg);
+    //         throw error;
+    //     }
+    // }, []);
 
-    const loginWithFacebook = useCallback(async () => {
-        setState(prev => ({ ...prev, isLoading: true, error: null }));
-        try {
-            // Login with permissions
-            const result = await LoginManager.logInWithPermissions(['public_profile', 'email']);
-            if (result.isCancelled) throw new Error('Facebook authentication cancelled');
+    // const loginWithFacebook = useCallback(async () => {
+    //     setState(prev => ({ ...prev, isLoading: true, error: null }));
+    //     try {
+    //         // Login with permissions
+    //         const result = await LoginManager.logInWithPermissions(['public_profile', 'email']);
+    //         if (result.isCancelled) throw new Error('Facebook authentication cancelled');
 
-            const data = await AccessToken.getCurrentAccessToken();
-            if (!data || !data.accessToken) throw new Error('Failed to get Facebook access token');
+    //         const data = await AccessToken.getCurrentAccessToken();
+    //         if (!data || !data.accessToken) throw new Error('Failed to get Facebook access token');
 
-            const response = await fetch(`${process.env.EXPO_PUBLIC_API_URL}/api/auth/facebook/verify`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ accessToken: data.accessToken })
-            });
+    //         const response = await fetch(`${process.env.EXPO_PUBLIC_API_URL}/api/auth/facebook/verify`, {
+    //             method: 'POST',
+    //             headers: { 'Content-Type': 'application/json' },
+    //             body: JSON.stringify({ accessToken: data.accessToken })
+    //         });
 
-            const respData = await response.json();
-            if (!response.ok) throw new Error(respData.message);
+    //         const respData = await response.json();
+    //         if (!response.ok) throw new Error(respData.message);
 
-            await SecureStore.setItemAsync("token", respData.data.token);
-            setState(prev => ({
-                ...prev,
-                token: respData.data.token,
-                user: respData.data.user,
-                isAuthenticated: true,
-                isGuest: false,
-                authMethod: 'facebook',
-                isLoading: false,
-                error: null
-            }));
-        } catch (error: any) {
-            let msg = error?.message || "Facebook login failed";
-            setError(msg);
-            throw error;
-        }
-    }, []);
+    //         await SecureStore.setItemAsync("token", respData.data.token);
+    //         setState(prev => ({
+    //             ...prev,
+    //             token: respData.data.token,
+    //             user: respData.data.user,
+    //             isAuthenticated: true,
+    //             isGuest: false,
+    //             authMethod: 'facebook',
+    //             isLoading: false,
+    //             error: null
+    //         }));
+    //     } catch (error: any) {
+    //         let msg = error?.message || "Facebook login failed";
+    //         setError(msg);
+    //         throw error;
+    //     }
+    // }, []);
 
     const sendEmailOTP = useCallback(async (email: string) => {
         setState(prev => ({ ...prev, isLoading: true, error: null }));
@@ -471,8 +466,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }));
         await SecureStore.deleteItemAsync("token");
     };
-
-    console.log("AuthProvider render");
+    const selectCompany=(company:Company)=>{
+        setState(prev => ({
+            ...prev,
+            company,
+        }));
+    }
+   
 
     return (
         <AuthContext.Provider value={{
@@ -489,13 +489,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             completeRegistration,
             clearError,
             loginAsGuest,
-            loginWithGoogle,
-            loginWithFacebook,
+            // loginWithGoogle,
+            // loginWithFacebook,
             sendEmailOTP,
             sendSMSOTP,
             verifyEmailOTP,
             verifyMobileOTP,
-            convertGuestToUser
+            convertGuestToUser,
+            selectCompany
         }}>
             {children}
         </AuthContext.Provider>

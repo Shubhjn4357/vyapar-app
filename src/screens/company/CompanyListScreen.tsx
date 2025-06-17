@@ -14,7 +14,7 @@ import Loader from "../../components/Loader";
 type Props = NativeStackScreenProps<RootStackParamList, 'CompanyList'>
 
 export default function CompanyListScreen({ navigation }: Props) {
-    const { companies, selectedCompany, isLoading, error, loadCompanies, selectCompany } = useCompany();
+    const { companies, selectedCompany, isLoading, error, loadCompanies, selectContextCompany:selectCompany } = useCompany();
     const { user } = useAuth();
     const styles = useStyle();
     const { theme } = useTheme();
@@ -47,8 +47,8 @@ export default function CompanyListScreen({ navigation }: Props) {
                 style={[
                     styles.card,
                     isSelected && { 
-                        backgroundColor: theme.primaryContainer,
-                        borderColor: theme.primary,
+                        backgroundColor: theme.colors.primaryContainer,
+                        borderColor: theme.colors.primary,
                         borderWidth: 2
                     }
                 ]}
@@ -60,31 +60,31 @@ export default function CompanyListScreen({ navigation }: Props) {
                         <View style={styles.row}>
                             <View style={[
                                 styles.avatar,
-                                { backgroundColor: isSelected ? theme.primary : theme.surfaceVariant }
+                                { backgroundColor: isSelected ? theme.colors.primary : theme.colors.surfaceVariant }
                             ]}>
                                 <Ionicons 
                                     name="business" 
                                     size={20} 
-                                    color={isSelected ? theme.onPrimary : theme.onSurfaceVariant} 
+                                    color={isSelected ? theme.colors.onPrimary : theme.colors.onSurfaceVariant} 
                                 />
                             </View>
                             <View style={{ marginLeft: 12, flex: 1 }}>
                                 <Text style={[
                                     styles.subtitle,
-                                    isSelected && { color: theme.onPrimaryContainer }
+                                    isSelected && { color: theme.colors.onPrimaryContainer }
                                 ]}>
                                     {item.name}
                                 </Text>
                                 <Text style={[
                                     styles.caption,
-                                    isSelected && { color: theme.onPrimaryContainer }
+                                    isSelected && { color: theme.colors.onPrimaryContainer }
                                 ]}>
                                     GSTIN: {item.gstin}
                                 </Text>
                                 {item.address && (
                                     <Text style={[
                                         styles.caption,
-                                        isSelected && { color: theme.onPrimaryContainer }
+                                        isSelected && { color: theme.colors.onPrimaryContainer }
                                     ]}>
                                         {item.address}
                                     </Text>
@@ -101,7 +101,7 @@ export default function CompanyListScreen({ navigation }: Props) {
                         <Ionicons 
                             name="pencil" 
                             size={20} 
-                            color={theme.primary} 
+                            color={theme.colors.primary} 
                         />
                     </TouchableOpacity>
                 </View>
@@ -117,7 +117,7 @@ export default function CompanyListScreen({ navigation }: Props) {
 
     const renderEmptyState = () => (
         <View style={styles.centerContainer}>
-            <Ionicons name="business-outline" size={64} color={theme.onSurfaceVariant} />
+            <Ionicons name="business-outline" size={64} color={theme.colors.onSurfaceVariant} />
             <Text style={[styles.title, { textAlign: 'center', marginTop: 16 }]}>
                 No Companies Found
             </Text>
@@ -138,17 +138,19 @@ export default function CompanyListScreen({ navigation }: Props) {
             </Text>
             
             {user?.subscription && (
-                <View style={[styles.card, { backgroundColor: theme.primaryContainer, marginTop: 16 }]}>
+                <View style={[styles.card, { backgroundColor: theme.colors.primaryContainer, marginTop: 16 }]}>
                     <View style={styles.row}>
-                        <Ionicons name="diamond" size={20} color={theme.onPrimaryContainer} />
-                        <Text style={[styles.body, { color: theme.onPrimaryContainer, marginLeft: 8 }]}>
-                            {user.subscription.planId.charAt(0).toUpperCase() + user.subscription.planId.slice(1)} Plan
+                        <Ionicons name="diamond" size={20} color={theme.colors.onPrimaryContainer} />
+                        <Text style={[styles.body, { color: theme.colors.onPrimaryContainer, marginLeft: 8 }]}>
+                            {user?.subscription?.plan
+    ? user.subscription.plan.charAt(0).toUpperCase() + user.subscription.plan.slice(1) + " Plan"
+    : "Plan not set"}
                         </Text>
                     </View>
-                    <Text style={[styles.caption, { color: theme.onPrimaryContainer, marginTop: 4 }]}>
+                    <Text style={[styles.caption, { color: theme.colors.onPrimaryContainer, marginTop: 4 }]}>
                         {companies.length} of {
-                            user.subscription.planId === 'free' ? '1' :
-                            user.subscription.planId === 'basic' ? '3' : '10'
+                            user.subscription.plan === 'free' ? '1' :
+                            user.subscription.plan === 'basic' ? '3' : '10'
                         } companies used
                     </Text>
                 </View>
@@ -169,8 +171,8 @@ export default function CompanyListScreen({ navigation }: Props) {
                     companies.length > 0 ? (
                         <View style={{ marginTop: 16 }}>
                             {error && (
-                                <View style={[styles.card, { backgroundColor: theme.errorContainer }]}>
-                                    <Text style={[styles.body, { color: theme.onErrorContainer }]}>
+                                <View style={[styles.card, { backgroundColor: theme.colors.errorContainer }]}>
+                                    <Text style={[styles.body, { color: theme.colors.onErrorContainer }]}>
                                         {error}
                                     </Text>
                                 </View>
@@ -181,7 +183,7 @@ export default function CompanyListScreen({ navigation }: Props) {
                                 onPress={handleCreateCompany}
                             >
                                 <View style={styles.row}>
-                                    <Ionicons name="add" size={20} color={theme.primary} />
+                                    <Ionicons name="add" size={20} color={theme.colors.primary} />
                                     <Text style={[styles.buttonTextOutlined, { marginLeft: 8 }]}>
                                         Add New Company
                                     </Text>
@@ -194,8 +196,8 @@ export default function CompanyListScreen({ navigation }: Props) {
                     <RefreshControl
                         refreshing={isLoading}
                         onRefresh={loadCompanies}
-                        colors={[theme.primary]}
-                        tintColor={theme.primary}
+                        colors={[theme.colors.primary]}
+                        tintColor={theme.colors.primary}
                     />
                 }
                 showsVerticalScrollIndicator={false}

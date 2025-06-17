@@ -8,6 +8,7 @@
     "scheme": "vyaparapp",
     "userInterfaceStyle": "dark",
     "newArchEnabled": true,
+    "jsEngine": "hermes",
     "ios": {
       "bundleIdentifier": "com.shubhjn.vyaparapp",
       "supportsTablet": true

@@ -14,8 +14,10 @@ import {
 import { useBills } from '../../hooks/useBills';
 import { Bill } from '../../types/bill';
 import { format } from 'date-fns';
-
-export default function BillListScreen() {
+import type { NativeStackScreenProps} from '@react-navigation/native-stack';
+import { BillStackParamList } from '@/src/types/navigation';
+type props = NativeStackScreenProps<BillStackParamList,'BillList'>
+export default function BillListScreen({navigation}:props) {
     const theme = useTheme();
     const { bills, loading, error, pagination, fetchBills } = useBills();
 
@@ -144,7 +146,7 @@ export default function BillListScreen() {
 
     const handleCreateBill = () => {
         // Navigate to create bill screen
-        console.log('Navigate to create bill');
+       navigation.navigate('CreateBill')
     };
 
     if (loading && bills.length === 0) {

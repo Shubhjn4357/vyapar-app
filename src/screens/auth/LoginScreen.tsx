@@ -19,7 +19,7 @@ type Props = NativeStackScreenProps<AuthStackParamList, 'Login'>;
 
 export default function LoginScreen({ navigation }: Props) {
     const { colors } = useTheme();
-    const { login, isLoading, error, clearError } = useAuth();
+    const { login, isLoading, error, clearError, loginAsGuest } = useAuth();
     const [socialVisible, setSocialVisible] = React.useState(false);
     const fadeAnim = React.useRef(new Animated.Value(0)).current;
     const [showPass,setShowPass] = React.useState(false);
@@ -128,6 +128,15 @@ export default function LoginScreen({ navigation }: Props) {
                     loading={isLoading}
                 >
                     Social Login
+                </Button>
+                <Button
+                    mode="outlined"
+                    icon="account-question"
+                    onPress={loginAsGuest}
+                    style={styles.socialButton}
+                    loading={isLoading}
+                >
+                    Login as Guest
                 </Button>
                 <SocialAuth
                     visible={socialVisible}

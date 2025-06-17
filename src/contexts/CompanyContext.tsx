@@ -12,7 +12,7 @@ type CompanyState = {
 
 type CompanyContextType = CompanyState & {
     loadCompanies: () => Promise<void>;
-    selectCompany: (company: Company) => void;
+    selectContextCompany: (company: Company) => void;
     createNewCompany: (data: { name: string; gstin: string; address?: string }) => Promise<Company>;
     updateExistingCompany: (id: string, data: { name: string; gstin: string; address?: string }) => Promise<Company>;
     clearError: () => void;
@@ -22,14 +22,15 @@ type CompanyContextType = CompanyState & {
 const CompanyContext = createContext<CompanyContextType | undefined>(undefined);
 
 export const CompanyProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-    const { token, user } = useAuth();
+    const { token, user,selectCompany } = useAuth();
+    
     const [state, setState] = useState<CompanyState>({
         companies: [],
         selectedCompany: null,
         isLoading: false,
         error: null,
     });
-
+   
     const setError = (error: string | null) =>
         setState(prev => ({ ...prev, error, isLoading: false }));
 
@@ -53,8 +54,9 @@ export const CompanyProvider: React.FC<{ children: React.ReactNode }> = ({ child
         }
     }, [token]);
 
-    const selectCompany = useCallback((company: Company) => {
+    const selectContextCompany = useCallback((company: Company) => {
         setState(prev => ({ ...prev, selectedCompany: company }));
+        selectCompany(company)
     }, []);
 
     const createNewCompany = useCallback(async (data: { name: string; gstin: string; address?: string }) => {
@@ -114,23 +116,22 @@ export const CompanyProvider: React.FC<{ children: React.ReactNode }> = ({ child
         }
     }, [token, state.selectedCompany]);
 
-    console.log("CompanyProvider render");
 
     // Load companies when user is authenticated
-    // useEffect(() => {
-    //     if (user && token) {
-    //         try {
-    //             loadCompanies();
-    //         } catch (error) {
-    //             console.log("problem in loading Company",error)
-    //         }
-    //     }
-    // }, [user, token]);
+    useEffect(() => {
+        if (user && token) {
+            try {
+                loadCompanies();
+            } catch (error) {
+                console.log("problem in loading Company",error)
+            }
+        }
+    }, [user, token]);
     return (
         <CompanyContext.Provider value={{
             ...state,
             loadCompanies,
-            selectCompany,
+            selectContextCompany,
             createNewCompany,
             updateExistingCompany,
             clearError,

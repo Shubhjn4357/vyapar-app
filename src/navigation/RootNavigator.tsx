@@ -10,12 +10,11 @@ import CompanyListScreen from "../screens/company/CompanyListScreen";
 import CreateCompanyScreen from "../screens/company/CreateCompanyScreen";
 import EditCompanyScreen from "../screens/company/EditCompanyScreen";
 import { CustomHeader } from "../components/CustomHeader";
-
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
 function AuthenticatedNavigator() {
     const { user, company} = useAuth();
-    console.log({user, company})
+    console.log({ company})
     // If profile is not complete, show profile completion screen
     if (!user?.isProfileComplete) {
         return (
@@ -98,9 +97,8 @@ function AuthenticatedNavigator() {
 }
 
 export default function RootNavigator() {
-   
+ 
     const { isAuthenticated, isLoading,error } = useAuth();
-    console.log(isAuthenticated,isLoading,error)
     if (isLoading) {
         return <SplashScreen />;
     }
@@ -113,5 +111,7 @@ export default function RootNavigator() {
         );
     }
 
-    return (<AuthenticatedNavigator />);
+    return (
+    <AuthenticatedNavigator />
+    );
 }
